@@ -6,16 +6,16 @@ mod tag_loader;
 
 type TagCheckFn = Fn(&str) -> bool;
 
+#[derive(Debug, PartialEq)]
 pub enum Tag {
     FullTag(TagStruct),
     StartTag(TagStruct),
     CloseTag(String),
 }
-
+#[derive(Debug, PartialEq)]
 struct TagStruct {
     name: String,
     attrs: HashMap<String, TagAttr>,
 }
-
-pub struct TagAttr (String);
-
+#[derive(Debug, PartialEq, PartialOrd)]
+pub struct TagAttr(String);

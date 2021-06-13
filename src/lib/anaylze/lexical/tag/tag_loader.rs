@@ -1,4 +1,4 @@
-use std::{collections::HashMap, ptr::read_volatile};
+use std::collections::HashMap;
 
 use crate::lib::anaylze::lexical::{clear_space, PreviewableIter};
 
@@ -6,6 +6,7 @@ use super::{Tag, TagAttr, TagStruct};
 
 impl Tag {
     pub fn load_next(data: &mut PreviewableIter) -> Option<Tag> {
+        clear_space(data);
         //asumme that commant and space hasbeen removed
         let start_sign = data.preview()?;
         if start_sign != '<' {
@@ -14,7 +15,13 @@ impl Tag {
             data.next()?;
             let (tag, is_closed) = Self::load_tag(data)?;
             if is_closed {
-                Some(Tag::CloseTag(tag))
+                let close = data.preview()?;
+                if close == '>' {
+                    data.next()?;
+                    Some(Tag::CloseTag(tag))
+                } else {
+                    None
+                }
             } else {
                 let attrs = Self::load_attrs(data)?;
                 clear_space(data);
@@ -42,10 +49,11 @@ impl Tag {
         loop {
             match data.preview() {
                 Some(d) => {
-                    if d.is_whitespace() {
+                    if (d.is_whitespace() || d == '/' || d == '>') && tag.len() > 0 {
                         break Some((tag, closer));
                     } else {
                         if d == '/' && tag.len() == 0 {
+                            data.next()?;
                             closer = true
                         }
                         tag.push(data.next()?);
@@ -134,5 +142,86 @@ impl Tag {
         } else {
             return None;
         }
+    }
+}
+
+#[cfg(test)]
+mod tag {
+    use super::*;
+
+    #[test]
+    fn test_load_tag() {
+        let mut iter = PreviewableIter::new(r#"/if mod="eq""#);
+
+        let res = Tag::load_tag(&mut iter).unwrap();
+
+        assert_eq!(res.1, true);
+        assert_eq!(res.0, "if");
+    }
+    #[test]
+    fn test_load_attr_name() {
+        let mut iter = PreviewableIter::new(r#"attr1="atat"#);
+
+        let res = Tag::load_attr_name(&mut iter).unwrap();
+
+        assert_eq!(res, "attr1");
+    }
+
+    #[test]
+    fn test_load_attr_value() {
+        let mut iter = PreviewableIter::new(r#""atat"#);
+
+        let res = Tag::load_attr_value(&mut iter).unwrap();
+
+        assert_eq!(res.get_raw(), "atat");
+    }
+
+    #[test]
+    fn test_load_attrs() {
+        let mut iter = PreviewableIter::new(r#"attr1="atat" attr2="aaa" >"#);
+
+        let res = Tag::load_attrs(&mut iter).unwrap();
+
+        assert_eq!(res.get("attr1").unwrap().get_raw(), "atat".to_string());
+        assert_eq!(res.get("attr2").unwrap().get_raw(), "aaa".to_string());
+        assert_eq!(iter.next().unwrap(), '>')
+    }
+
+    #[test]
+    fn test_load_next_tag() {
+        let mut iter = PreviewableIter::new(
+            r#"<img file="/var/pic/..."/>
+        <if mod="eq" left="value_name" right="'value'"></if>"#,
+        );
+
+        let res = Tag::load_next(&mut iter).unwrap();
+
+        if let Tag::FullTag(s) = res {
+            assert_eq!(s.name, "img");
+            assert_eq!(s.attrs.get("file").unwrap().get_raw(), "/var/pic/...");
+        } else {
+            panic!("Bad type")
+        }
+        assert_eq!(iter.preview(), Some('\n'));
+
+        let res = Tag::load_next(&mut iter).unwrap();
+        if let Tag::StartTag(s) = res {
+            assert_eq!(s.name, "if");
+            assert_eq!(s.attrs.get("mod").unwrap().get_raw(), "eq");
+            assert_eq!(s.attrs.get("left").unwrap().get_raw(), "value_name");
+            assert_eq!(s.attrs.get("right").unwrap().get_raw(), "'value'");
+        } else {
+            panic!("Bad type")
+        }
+        assert_eq!(iter.preview(), Some('<'));
+
+        let res = Tag::load_next(&mut iter).unwrap();
+        if let Tag::CloseTag(s) = res {
+            assert_eq!(s, "if");
+        } else {
+            panic!("Bad type")
+        }
+
+        assert_eq!(iter.next(), None);
     }
 }

@@ -5,7 +5,7 @@ use super::{TagAttr, };
 
 
 impl TagAttr {
-    pub fn iter<'a>(&'a self) -> PreviewableIter<'a> {
+     pub fn iter<'a>(&'a self) -> PreviewableIter<'a> {
         PreviewableIter::new(&self.0[..])
     }
 }
