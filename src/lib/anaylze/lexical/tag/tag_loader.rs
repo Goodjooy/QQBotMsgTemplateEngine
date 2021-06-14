@@ -1,18 +1,25 @@
+use crate::lib::anaylze::lexical::util::{check_next_sign, clear_space};
 use std::collections::HashMap;
 
-use crate::lib::anaylze::lexical::{clear_space, PreviewableIter};
+use crate::lib::anaylze::lexical::PreviewableIter;
 
 use super::{Tag, TagAttr, TagStruct};
 
 impl Tag {
     pub fn load_next(data: &mut PreviewableIter) -> Option<Tag> {
-        clear_space(data);
+        clear_space(data)?;
         //asumme that commant and space hasbeen removed
         let start_sign = data.preview()?;
         if start_sign != '<' {
             None
         } else {
             data.next()?;
+            if Self::clear_comment(data)? {
+                clear_space(data)?;
+                if !check_next_sign('<', true, data)? {
+                    return None;
+                }
+            }
             let (tag, is_closed) = Self::load_tag(data)?;
             if is_closed {
                 let close = data.preview()?;
@@ -143,12 +150,40 @@ impl Tag {
             return None;
         }
     }
+    fn clear_comment(data: &mut PreviewableIter) -> Option<bool> {
+        if check_next_sign('?', true, data)? {
+            loop {
+                match data.preview() {
+                    Some(c) => {
+                        if c != '?' {
+                            data.next()?;
+                        } else {
+                            data.next()?;
+                            if check_next_sign('>', true, data)? {
+                                break Some(true);
+                            }
+                        }
+                    }
+                    None => break None,
+                }
+            }
+        } else {
+            Some(false)
+        }
+    }
 }
 
 #[cfg(test)]
 mod tag {
     use super::*;
+    #[test]
+    fn test_clear_cmd() {
+        let mut iter = PreviewableIter::new(r#"?/if mod="eq"?><if>"#);
 
+        let res = Tag::clear_comment(&mut iter).unwrap();
+
+        assert_eq!(iter.next().unwrap(), '<')
+    }
     #[test]
     fn test_load_tag() {
         let mut iter = PreviewableIter::new(r#"/if mod="eq""#);
@@ -191,6 +226,7 @@ mod tag {
     fn test_load_next_tag() {
         let mut iter = PreviewableIter::new(
             r#"<img file="/var/pic/..."/>
+            <?<abb a="aaa">?>
         <if mod="eq" left="value_name" right="'value'"></if>"#,
         );
 
