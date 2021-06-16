@@ -1,12 +1,15 @@
-use crate::lib::anaylze::lexical::util::{check_next_sign, clear_space};
+use crate::lib::anaylze::{
+    lexical::util::{check_next_sign, clear_space},
+    LoadNext,
+};
 use std::collections::HashMap;
 
 use crate::lib::anaylze::lexical::PreviewableIter;
 
 use super::{Tag, TagAttr, TagStruct};
 
-impl Tag {
-    pub fn load_next(data: &mut PreviewableIter) -> Option<Tag> {
+impl LoadNext<Tag> for Tag {
+    fn load_next(data: &mut PreviewableIter) -> Option<Tag> {
         clear_space(data)?;
         //asumme that commant and space hasbeen removed
         let start_sign = data.preview()?;

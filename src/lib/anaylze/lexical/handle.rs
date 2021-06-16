@@ -1,3 +1,5 @@
+use crate::lib::anaylze::LoadNext;
+
 use super::{literal::Literal, tag::Tag, LexicalHandle, LexicalType, PreviewableIter};
 
 impl LexicalHandle<'_> {
@@ -11,7 +13,7 @@ impl LexicalHandle<'_> {
         Tag::load_next(&mut self.data)
             .and_then(|f| Some(LexicalType::Tag(f)))
             .or_else(|| {
-                Literal::read_next(&mut self.data).and_then(|f| Some(LexicalType::Literal(f)))
+                Literal::load_next(&mut self.data).and_then(|f| Some(LexicalType::Literal(f)))
             })
     }
 }
