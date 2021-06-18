@@ -13,6 +13,7 @@ pub enum Sign {
 pub enum Value {
     Int(i64),
     Str(String),
+    List(Vec<Value>)
 }
 
 pub struct Var {

@@ -26,7 +26,7 @@
         `<var name="value_name" mod="print"/>`会显示变量<endl/>
         也支持更加复杂的显示
         <var name="value_name" mod="println"/>
-        <sign value="{"/>好耶<endl/>
+        <sign s="{"/>好耶<endl/>
     </if>
     <elif mod="boolT" value="true">
         真的<sign s="/n"/>

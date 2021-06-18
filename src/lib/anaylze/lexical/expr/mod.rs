@@ -17,7 +17,6 @@ impl<'a> LoadNextWithSignTable<'a, ExprLexical<'a>> for ExprLexical<'a> {
         clear_space(data);
 
         let ch = data.preview()?;
-
         if ch.is_digit(10) {
             data.next()?;
             let start = ch.to_digit(10).unwrap() as i64;

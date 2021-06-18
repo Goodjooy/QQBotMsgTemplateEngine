@@ -1,3 +1,5 @@
+use std::collections::vec_deque;
+
 use super::Value;
 
 impl Value {
@@ -5,6 +7,12 @@ impl Value {
         match self {
             Value::Int(i) => i.to_string(),
             Value::Str(s) => s.to_string(),
+            Value::List(l) => l
+                .iter()
+                .map(|f| f.to_string())
+                .reduce(|a, b| format!("{}, {}", a, b))
+                .and_then(|s| Some(format!("[{}]", s)))
+                .unwrap_or("%%Failure To String%%".to_string()),
         }
     }
     fn format(&self, format: &str) -> String {
@@ -27,3 +35,12 @@ fn test_format() {
     assert_eq!(f, "第13{}个13");
 }
 
+#[test]
+fn test_to_string() {
+    let v = Value::List(vec![
+        Value::Int(11),
+        Value::Int(21),
+        Value::List(vec![Value::Str("SSS".to_string())]),
+    ]);
+    assert_eq!(v.to_string(), "[11, 21, [SSS]]")
+}
