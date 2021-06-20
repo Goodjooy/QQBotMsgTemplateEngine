@@ -1,7 +1,9 @@
 use super::{util::clear_space, PreviewableIter};
 use crate::lib::anaylze::{LoadNextWithSignTable, Sign, SignTableHandle};
+use std::fmt::Display;
 
 pub enum ExprLexical<'a> {
+    Nil,
     Literal(String),
     CaculateSign(char),
     GroupSign(char),
@@ -93,6 +95,35 @@ impl ExprLexical<'_> {
         }
     }
 }
+impl Display for ExprLexical<'_> {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            ExprLexical::Nil => write!(f, "UnKonw"),
+            ExprLexical::Literal(l) => write!(f, "<literal, '{}'>", l),
+            ExprLexical::CaculateSign(ch) => write!(f, "< {} >", ch),
+            ExprLexical::GroupSign(ch) => write!(f, "< {} >", ch),
+            ExprLexical::Digit(num) => write!(f, "< const, {} >", num),
+            ExprLexical::Value(var) => match var {
+                Sign::Var(v) => write!(f, "< '{}', {} >", v.name, v.value.to_string()),
+            },
+        }
+    }
+}
+
+pub struct ExprIter<'a, S>(PreviewableIter<'a>, &'a S)
+where
+    S: SignTableHandle;
+
+impl<'a, S> Iterator for ExprIter<'a, S>
+where
+    S: SignTableHandle,
+{
+    type Item = ExprLexical<'a>;
+
+    fn next(&mut self) -> Option<Self::Item> {
+        ExprLexical::load_next(&mut self.0, self.1)
+    }
+}
 
 #[cfg(test)]
 mod expr {
@@ -134,44 +165,42 @@ mod expr {
         let mut data = PreviewableIter::new("_aaa abb_aa aaacd11 aaAA AAv 011a");
 
         clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data).unwrap();
+        let v = ExprLexical::read_sign_name(&mut data).unwrap();
 
-        assert_eq!(v,"_aaa");
-        assert_eq!(data.preview().unwrap(),' ');
-
-        clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data).unwrap();
-
-        assert_eq!(v,"abb_aa");
-        assert_eq!(data.preview().unwrap(),' ');
+        assert_eq!(v, "_aaa");
+        assert_eq!(data.preview().unwrap(), ' ');
 
         clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data).unwrap();
+        let v = ExprLexical::read_sign_name(&mut data).unwrap();
 
-        assert_eq!(v,"aaacd11");
-        assert_eq!(data.preview().unwrap(),' ');
-
-        clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data).unwrap();
-
-        assert_eq!(v,"aaAA");
-        assert_eq!(data.preview().unwrap(),' ');
+        assert_eq!(v, "abb_aa");
+        assert_eq!(data.preview().unwrap(), ' ');
 
         clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data).unwrap();
+        let v = ExprLexical::read_sign_name(&mut data).unwrap();
 
-        assert_eq!(v,"AAv");
-        assert_eq!(data.preview().unwrap(),' ');
+        assert_eq!(v, "aaacd11");
+        assert_eq!(data.preview().unwrap(), ' ');
 
         clear_space(&mut data);
-        let v=ExprLexical::read_sign_name(&mut data);
+        let v = ExprLexical::read_sign_name(&mut data).unwrap();
 
-        assert_eq!(v,None);
-        assert_eq!(data.next(),Some('0'));
+        assert_eq!(v, "aaAA");
+        assert_eq!(data.preview().unwrap(), ' ');
+
+        clear_space(&mut data);
+        let v = ExprLexical::read_sign_name(&mut data).unwrap();
+
+        assert_eq!(v, "AAv");
+        assert_eq!(data.preview().unwrap(), ' ');
+
+        clear_space(&mut data);
+        let v = ExprLexical::read_sign_name(&mut data);
+
+        assert_eq!(v, None);
+        assert_eq!(data.next(), Some('0'));
     }
 
     #[test]
-    fn full_test() {
-        
-    }
+    fn full_test() {}
 }

@@ -3,7 +3,7 @@ use std::collections::vec_deque;
 use super::Value;
 
 impl Value {
-    fn to_string(&self) -> String {
+    pub fn to_string(&self) -> String {
         match self {
             Value::Int(i) => i.to_string(),
             Value::Str(s) => s.to_string(),
@@ -15,7 +15,7 @@ impl Value {
                 .unwrap_or("%%Failure To String%%".to_string()),
         }
     }
-    fn format(&self, format: &str) -> String {
+    pub fn format(&self, format: &str) -> String {
         let s = self.to_string();
 
         format

@@ -60,15 +60,15 @@ pub enum CmpMod<'a> {
     BoolF(&'a Value),
 }
 
-pub struct Var {
+pub struct Var<'a> {
     name:String,
-    op:ValueOperate
+    op:ValueOperate<'a>
 }
 
-pub enum ValueOperate {
-    Assign(Expression),
+pub enum ValueOperate<'a> {
+    Assign(Expression<'a>),
     New,
-    NewDefault(Expression),
+    NewDefault(Expression<'a>),
     Print(String),
     Println(String),
 }

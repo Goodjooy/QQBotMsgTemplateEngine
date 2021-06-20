@@ -1,31 +1,50 @@
-use crate::lib::anaylze::{Value, Var};
+use crate::lib::anaylze::Var;
 
+use super::{LoadErr, LoadStatus};
+
+mod caculate;
+mod factor;
+mod handle;
+mod item;
+mod literal;
+
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Literal(String);
-pub struct ExprVar(Var);
-
-pub enum Factor {
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct ExprVar<'a>(&'a Var);
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum Factor<'a> {
     Digit(i64),
-    SubExpr(),
-    Var(ExprVar),
+    SubExpr(Box<Expression<'a>>),
+    Var(ExprVar<'a>),
 }
-
-pub enum SubItem {
-    Multiple(Factor, Box<SubItem>),
-    Division(Factor, Box<SubItem>),
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum SubItem<'a> {
+    Multiple(Factor<'a>, Box<SubItem<'a>>),
+    Division(Factor<'a>, Box<SubItem<'a>>),
     Nil,
 }
-pub struct Item(Factor, SubItem);
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Item<'a>(Factor<'a>, SubItem<'a>);
 
-pub enum SubCaculate {
-    Addition(Item, Box<SubCaculate>),
-    Subtraction(Item, Box<SubCaculate>),
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum SubCaculate<'a> {
+    Addition(Item<'a>, Box<SubCaculate<'a>>),
+    Subtraction(Item<'a>, Box<SubCaculate<'a>>),
     Nil,
 }
-
-pub struct Caculate(Item, SubCaculate);
-
-pub enum Expression {
-    Caculate(Caculate),
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub struct Caculate<'a>(Item<'a>, SubCaculate<'a>);
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
+pub enum Expression<'a> {
+    Caculate(Caculate<'a>),
     Literal(Literal),
-    Value(ExprVar),
+    Value(ExprVar<'a>),
+}
+
+pub fn nil_sign<'a, T>(err: LoadErr, nil: T) -> Result<LoadStatus<'a, T>, LoadErr> {
+    match err {
+        LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
+        LoadErr::UnexprectLetical(s) => Err(LoadErr::UnexprectLetical(s)),
+    }
 }

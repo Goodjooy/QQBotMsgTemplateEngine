@@ -8,12 +8,12 @@ use self::tag::Tag;
 
 use super::Sign;
 
-mod expr;
-mod iter;
-mod literal;
-mod tag;
-mod util;
-mod handle;
+pub mod expr;
+pub mod iter;
+pub mod literal;
+pub mod tag;
+pub mod util;
+pub mod handle;
 
 pub struct PreviewableIter<'a> {
     preview: char,

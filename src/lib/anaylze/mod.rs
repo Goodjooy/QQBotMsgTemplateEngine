@@ -2,23 +2,31 @@ use std::fmt::{Debug, Display};
 
 use self::lexical::PreviewableIter;
 mod lexical;
+mod sign_table;
 mod syntax;
 mod val_cmp;
 mod val_format;
 
+pub struct Anaylze<'a, S>
+where
+    S: SignTableHandle,
+{
+    sign_table: S,
+    data: PreviewableIter<'a>,
+}
 pub enum Sign {
     Var(Var),
 }
-#[derive(PartialEq, PartialOrd)]
+#[derive(Debug,Clone,PartialEq, PartialOrd)]
 pub enum Value {
     Int(i64),
     Str(String),
-    List(Vec<Value>)
+    List(Vec<Value>),
 }
-
+#[derive(Debug,Clone,PartialEq, PartialOrd)]
 pub struct Var {
-    name: String,
-    value: Value,
+    pub name: String,
+    pub value: Value,
 }
 
 pub trait SignTableHandle {
