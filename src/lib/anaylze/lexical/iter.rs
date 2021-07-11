@@ -5,7 +5,20 @@ impl Iterator for PreviewableIter<'_> {
 
     fn next(&mut self) -> Option<Self::Item> {
         let temp = self.preview;
-        self.preview = self.iter.next().or(Some('\0'))?;
+        self.preview = self
+            .iter
+            .next()
+            .and_then(|c| {
+                //记录当前位置
+                if c == '\n' {
+                    self.line += 1;
+                    self.offset = 0
+                } else {
+                    self.offset += 1;
+                }
+                Some(c)
+            })
+            .or(Some('\0'))?;
         Self::preview_check(temp)
     }
 }
@@ -14,6 +27,8 @@ impl<'a> PreviewableIter<'a> {
         let mut t = PreviewableIter {
             preview: '\0',
             iter: data.chars(),
+            offset: 0,
+            line: 0,
         };
         t.next();
         t
@@ -28,5 +43,9 @@ impl<'a> PreviewableIter<'a> {
         } else {
             Some(data)
         }
+    }
+
+    pub fn get_postion(&self) -> (usize, usize) {
+        (self.line, self.offset)
     }
 }

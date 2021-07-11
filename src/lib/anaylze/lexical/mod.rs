@@ -17,6 +17,8 @@ pub mod handle;
 
 pub struct PreviewableIter<'a> {
     preview: char,
+    offset:usize,
+    line:usize,
     iter: Chars<'a>,
 }
 #[derive(Debug)]
