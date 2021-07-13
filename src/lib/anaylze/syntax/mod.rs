@@ -11,7 +11,7 @@ where
 {
     fn load_next(last: ExprLexical<'a>, expr: &mut I) -> Result<LoadStatus<'a, T>, LoadErr>;
 }
-
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum LoadStatus<'a, T> {
     Success(T),
     NotMatch(ExprLexical<'a>),
@@ -65,7 +65,7 @@ impl<'a, T> LoadStatus<'a, T> {
         Ok(self)
     }
 }
-
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum LoadErr {
     IterEnd,
     UnexprectLetical(String),

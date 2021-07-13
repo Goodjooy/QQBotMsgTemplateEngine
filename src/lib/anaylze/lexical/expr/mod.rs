@@ -1,7 +1,7 @@
 use super::{util::clear_space, PreviewableIter};
 use crate::lib::anaylze::{LoadNextWithSignTable, Sign, SignTableHandle};
 use std::fmt::Display;
-
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ExprLexical<'a> {
     Nil,
     Literal(String),
@@ -83,10 +83,20 @@ impl ExprLexical<'_> {
         if ch.is_ascii_alphabetic() || ch == '_' {
             s.push(data.next()?);
             loop {
-                let ch = data.preview()?;
-                if ch.is_ascii_alphabetic() || ch == '_' || ch.is_digit(10) {
-                    s.push(data.next()?);
-                } else {
+                let need_end = data
+                    .preview()
+                    .and_then(|ch| {
+                        if ch.is_ascii_alphabetic() || ch == '_' || ch.is_digit(10) {
+                            s.push(data.next()?);
+                            Some(false)
+                        } else {
+                            Some(true)
+                        }
+                    })
+                    .or(Some(true))
+                    .unwrap();
+
+                if need_end {
                     break Some(s);
                 }
             }
@@ -122,6 +132,12 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         ExprLexical::load_next(&mut self.0, self.1)
+    }
+}
+
+impl<'a, S: SignTableHandle> ExprIter<'a, S> {
+    pub fn new(signs: & 'a mut S, iter: PreviewableIter<'a>) -> Self {
+        ExprIter(iter, signs)
     }
 }
 

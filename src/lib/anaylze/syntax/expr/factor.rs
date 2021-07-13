@@ -27,9 +27,9 @@ where
 
                     let close = expr.next().ok_or(LoadErr::IterEnd)?;
                     if let ExprLexical::GroupSign(ch) = close {
-                        if ch==')'{
+                        if ch == ')' {
                             Ok(LoadStatus::ok(Factor::SubExpr(Box::new(exp))))
-                        }else {
+                        } else {
                             Err(LoadErr::unexpect("')'", close))
                         }
                     } else {
@@ -46,8 +46,49 @@ where
 }
 
 #[cfg(test)]
-mod test{
+mod test {
+    use crate::lib::anaylze::syntax::expr::LexIter;
+use crate::lib::anaylze::{Sign, Value, Var, lexical::PreviewableIter};
+
     use super::*;
 
     
+    #[test]
+    fn test_load_digit() {
+        let mut signs=LexIter::new();
+        let iter=PreviewableIter::new("11");
+        let mut expr=ExprIter::new(&mut signs, iter);
+
+        let last=expr.next().unwrap();
+
+        let t=Factor::load_next(last, &mut expr);
+        assert_eq!(t,Ok(LoadStatus::Success(Factor::Digit(11))));
+    }
+
+    #[test]
+    fn test_load_sign() {
+        let mut signs=LexIter::new();
+        let iter=PreviewableIter::new("test_D test_U test_S");
+        let mut expr=ExprIter::new(&mut signs, iter);
+
+        
+        let last=expr.next().unwrap();
+        let t=Factor::load_next(last, &mut expr);
+        let d=Var{name:"".to_string(),value:Value::Int(-11)};
+        assert_eq!(t,Ok(LoadStatus::Success(Factor::Var(ExprVar(&d)))));
+
+        let last=expr.next().unwrap();
+        let t=Factor::load_next(last, &mut expr);
+        let d=Var{name:"".to_string(),value:Value::Int(11)};
+        assert_eq!(t,Ok(LoadStatus::Success(Factor::Var(ExprVar(&d)))));
+
+        let last=expr.next().unwrap();
+        let t=Factor::load_next(last, &mut expr);
+        let d=Var{name:"".to_string(),value:Value::Str("SSSS".to_string())};
+        assert_eq!(t,Ok(LoadStatus::Success(Factor::Var(ExprVar(&d))))); 
+    }
+    #[test]
+    fn test_sub(){
+        todo!()
+    }
 }

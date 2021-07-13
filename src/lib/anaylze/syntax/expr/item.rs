@@ -70,3 +70,56 @@ impl SubItem<'_> {
         }
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+    use crate::lib::anaylze::Value;
+    use crate::{
+        lib::anaylze::{
+            lexical::PreviewableIter,
+            syntax::{
+                self,
+                expr::{ExprVar, LexIter},
+            },
+            Var,
+        },
+        test_data,
+    };
+
+    #[test]
+    fn test_signle_digit() {
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new("13");
+        let mut expr = ExprIter::new(&mut signs, iter);
+        let last = expr.next().unwrap();
+        let t = Item::load_next(last, &mut expr);
+
+        assert_eq!(
+            t,
+            Ok(LoadStatus::Success(Item(Factor::Digit(13), SubItem::Nil)))
+        );
+    }
+
+    #[test]
+    fn test_operate_digit() {
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new("test_D*11");
+        let mut expr = ExprIter::new(&mut signs, iter);
+
+        let last = expr.next().unwrap();
+        let t = Item::load_next(last, &mut expr);
+
+        let v = Var {
+            name: "".to_string(),
+            value: Value::Int(-11),
+        };
+        assert_eq!(
+            t,
+            Ok(LoadStatus::Success(Item(
+                Factor::Var(ExprVar(&v)),
+                SubItem::Multiple(Factor::Digit(11), Box::new(SubItem::Nil))
+            )))
+        )
+    }
+}

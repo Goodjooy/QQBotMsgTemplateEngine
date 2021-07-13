@@ -15,6 +15,7 @@ where
     sign_table: S,
     data: PreviewableIter<'a>,
 }
+#[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Sign {
     Var(Var),
 }

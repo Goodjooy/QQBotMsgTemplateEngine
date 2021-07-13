@@ -1,3 +1,6 @@
+use crate::lib::anaylze::Value;
+use crate::lib::anaylze::SignTableHandle;
+use crate::lib::anaylze::Sign;
 use crate::lib::anaylze::Var;
 
 use super::{LoadErr, LoadStatus};
@@ -47,4 +50,62 @@ pub fn nil_sign<'a, T>(err: LoadErr, nil: T) -> Result<LoadStatus<'a, T>, LoadEr
         LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
         LoadErr::UnexprectLetical(s) => Err(LoadErr::UnexprectLetical(s)),
     }
+}
+
+///test struct
+struct LexIter {
+    d: Sign,
+    u: Sign,
+    s: Sign,
+}
+
+impl SignTableHandle for LexIter {
+    fn check_exist(&self, key: &str) -> bool {
+        match key {
+            "test_D" | "test_U" | "test_S" => true,
+            _ => false,
+        }
+    }
+
+    fn get_sign(&self, key: &str) -> Option<&crate::lib::anaylze::Sign> {
+        match key {
+            "test_D" => Some(&self.d),
+            "test_U" => Some(&self.u),
+            "test_S" => Some(&self.s),
+            _ => None,
+        }
+    }
+
+    fn get_mut_sign(&mut self, key: &str) -> Option<&mut crate::lib::anaylze::Sign> {
+        match key {
+            "test_D" => Some(&mut self.d),
+            "test_U" => Some(&mut self.u),
+            "test_S" => Some(&mut self.s),
+            _ => None,
+        }
+    }
+
+    fn new_sign(&mut self, key: &str, value: crate::lib::anaylze::Sign) -> Option<()> {
+        None
+    }
+}
+
+impl LexIter {
+    fn new()->Self{
+        LexIter{
+            d:Sign::Var(Var{name:"".to_string(),value:Value::Int(-11)}),
+            u:Sign::Var(Var{name:"".to_string(),value:Value::Int(11)}),
+            s:Sign::Var(Var{name:"".to_string(),value:Value::Str("SSSS".to_string())}),
+
+        }
+    }
+}
+
+#[macro_export]
+macro_rules! test_data {
+    ($x:expr) => {
+        let mut signs=LexIter::new();
+        let iter=PreviewableIter::new(stringify!(x));
+        let mut expr=ExprIter::new(&mut signs, iter);
+    };
 }
