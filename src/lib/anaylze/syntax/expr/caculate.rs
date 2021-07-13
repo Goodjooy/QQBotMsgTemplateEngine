@@ -13,26 +13,28 @@ where
         expr: &mut ExprIter<'a, S>,
     ) -> Result<LoadStatus<'a, SubCaculate<'a>>, LoadErr> {
         if let ExprLexical::CaculateSign(sign) = last {
-            if sign == '+' || sign == '-' {
-                expr.next()
+            match sign {
+                '+' | '-' => expr
+                    .next()
                     .ok_or(LoadErr::IterEnd)
                     .and_then(|last| {
-                        let item = Item::load_next(last, expr)?
-                            .ok_or_else(|exp| LoadErr::unexpect("Item", exp))?;
+                        Item::load_next(last, expr)?
+                            .ok_or_else(|exp| LoadErr::unexpect("Item", exp))
+                    })
+                    .and_then(|item| {
                         expr.next()
                             .ok_or(LoadErr::IterEnd)
-                            .and_then(|last| {
-                                SubCaculate::load_next(last, expr)?
-                                    .and_then(|sub| SubCaculate::new(sign, item.clone(), sub))
-                                    .into_ok()
-                            })
-                            .or_else(|err| nil_sign(err, SubCaculate::Nil))?
+                            .and_then(|f| Ok((item, f)))
+                    })
+                    .and_then(|last| {
+                        let (item, last) = last;
+                        SubCaculate::load_next(last, expr)?
+                            .and_then(move |sub| SubCaculate::new(sign, item.clone(), sub))
                             .into_ok()
                     })
                     .or_else(|err| nil_sign(err, SubCaculate::Nil))?
-                    .into_ok()
-            } else {
-                Err(LoadErr::unexpect("'+' Or '-'", last))
+                    .into_ok(),
+                _ => Err(LoadErr::unexpect("'+' Or '-'", last)),
             }
         } else {
             Ok(LoadStatus::unmatch(last))

@@ -32,32 +32,41 @@ where
         expr: &mut ExprIter<'a, S>,
     ) -> Result<LoadStatus<'a, SubItem<'a>>, LoadErr> {
         match last {
-            ExprLexical::CaculateSign(sign) => {
-                if sign == '/' || sign == '*' {
-                    let factor = Factor::load_next(last, expr)?
-                        .ok_or_else(|e| LoadErr::unexpect("Factor", e))?;
-
+            ExprLexical::CaculateSign(sign) => match sign {
+                '/' | '*' => {
                     //iter end and nil result
                     expr.next()
                         .ok_or(LoadErr::IterEnd)
+                        .and_then(|op| {
+                            Factor::load_next(op, expr)?
+                                .ok_or_else(|exp| LoadErr::unexpect("Factor", exp))
+                        })
+                        .and_then(|f| expr.next().ok_or(LoadErr::IterEnd).and_then(|e| Ok((f, e))))
                         .and_then(|last_expr| {
-                            SubItem::load_next(last_expr, expr)?
-                                .and_then(|sub| {
-                                    if sign == '/' {
-                                        SubItem::Division(factor.clone(), Box::new(sub))
-                                    } else {
-                                        SubItem::Multiple(factor.clone(), Box::new(sub))
-                                    }
-                                })
+                            let (factor, last) = last_expr;
+                            SubItem::load_next(last, expr).and_then(|d| Ok((d, factor)))
+                        })
+                        .and_then(|sub| {
+                            let (sub, factor) = sub;
+                            sub.and_then(|sub| SubItem::new(factor.clone(), sub, sign))
                                 .into_ok()
                         })
                         .or_else(|err| nil_sign(err, SubItem::Nil))?
                         .into_ok()
-                } else {
-                    Ok(LoadStatus::ok(SubItem::Nil))
                 }
-            }
+                _ => Ok(LoadStatus::ok(SubItem::Nil)),
+            },
             e => Ok(LoadStatus::unmatch(e)),
+        }
+    }
+}
+
+impl SubItem<'_> {
+    fn new<'a>(factor: Factor<'a>, sub: SubItem<'a>, sign: char) -> SubItem<'a> {
+        if sign == '/' {
+            SubItem::Division(factor, Box::new(sub))
+        } else {
+            SubItem::Multiple(factor, Box::new(sub))
         }
     }
 }

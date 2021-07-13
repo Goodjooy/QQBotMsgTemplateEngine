@@ -1,4 +1,5 @@
-use std::fmt::{Debug, Display};
+
+use std::fmt::Debug;
 
 use self::lexical::PreviewableIter;
 mod lexical;
@@ -45,3 +46,4 @@ pub trait LoadNextWithSignTable<'a, T> {
     where
         S: SignTableHandle;
 }
+
