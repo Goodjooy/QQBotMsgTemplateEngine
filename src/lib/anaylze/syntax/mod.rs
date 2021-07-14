@@ -53,7 +53,7 @@ impl<'a, T> LoadStatus<'a, T> {
     }
     pub fn and_then<R, F>(self, f: F) -> LoadStatus<'a, R>
     where
-        F: Fn(T) -> R,
+        F: FnOnce(T) -> R,
     {
         match self {
             LoadStatus::Success(data) => LoadStatus::ok(f(data)),
@@ -72,7 +72,8 @@ pub enum LoadErr {
 }
 
 impl LoadErr {
-    pub fn unexpect<'a, T: Display>(expect: &'a str, get: T) -> LoadErr {
-        LoadErr::UnexprectLetical(format!("Expect `{}` But Get `{}`", expect, get))
+    pub fn unexpect<'a, T: Display>(expect: &'a str, get: T,pos:(usize,usize)) -> LoadErr {
+        let(line,offset)=pos;
+        LoadErr::UnexprectLetical(format!("Expect `{}` But Get `{}` At line: {} Offset: {}", expect, get,line,offset))
     }
 }

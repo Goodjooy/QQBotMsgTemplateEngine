@@ -42,10 +42,10 @@ pub struct Caculate<'a>(Item<'a>, SubCaculate<'a>);
 pub enum Expression<'a> {
     Caculate(Caculate<'a>),
     Literal(Literal),
-    Value(ExprVar<'a>),
 }
 
 pub fn nil_sign<'a, T>(err: LoadErr, nil: T) -> Result<LoadStatus<'a, T>, LoadErr> {
+    println!("{:?}",err);
     match err {
         LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
         LoadErr::UnexprectLetical(s) => Err(LoadErr::UnexprectLetical(s)),

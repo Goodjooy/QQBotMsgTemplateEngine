@@ -23,20 +23,20 @@ where
                     let now = expr.next().ok_or(LoadErr::IterEnd)?;
 
                     let exp = Expression::load_next(now, expr)?
-                        .ok_or_else(|e| LoadErr::unexpect("Expression", e))?;
+                        .ok_or_else(|e| LoadErr::unexpect("Expression", e,expr.get_postion()))?;
 
                     let close = expr.next().ok_or(LoadErr::IterEnd)?;
                     if let ExprLexical::GroupSign(ch) = close {
                         if ch == ')' {
                             Ok(LoadStatus::ok(Factor::SubExpr(Box::new(exp))))
                         } else {
-                            Err(LoadErr::unexpect("')'", close))
+                            Err(LoadErr::unexpect("')'", close,expr.get_postion()))
                         }
                     } else {
-                        Err(LoadErr::unexpect("GroupSgin", close))
+                        Err(LoadErr::unexpect("GroupSgin", close,expr.get_postion()))
                     }
                 } else {
-                    Err(LoadErr::unexpect("'('", ch))
+                    Err(LoadErr::unexpect("'('", ch,expr.get_postion()))
                 }
             }
             ExprLexical::Nil => Err(LoadErr::IterEnd),
@@ -89,6 +89,23 @@ use crate::lib::anaylze::{Sign, Value, Var, lexical::PreviewableIter};
     }
     #[test]
     fn test_sub(){
-        todo!()
+        let mut signs=LexIter::new();
+        let iter=PreviewableIter::new("(test_D+ test_U) *test_S-12");
+        let mut expr=ExprIter::new(&mut signs, iter);
+
+        let last=expr.next().unwrap();
+        let t=Factor::load_next(last, &mut expr);
+
+        assert_eq!(
+            t,
+            Ok(
+                LoadStatus::Success(
+                    Factor::SubExpr(
+                        todo!()
+                    )
+                )
+            )
+        )
+
     }
 }

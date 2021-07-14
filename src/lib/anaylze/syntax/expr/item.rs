@@ -1,4 +1,4 @@
-use crate::lib::anaylze::lexical::expr::{ExprIter, ExprLexical};
+use crate::lib::anaylze::lexical::expr::{self, ExprIter, ExprLexical};
 use crate::lib::anaylze::syntax::{LoadErr, LoadStatus, SyntaxLoadNext};
 use crate::lib::anaylze::SignTableHandle;
 
@@ -12,13 +12,18 @@ where
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
     ) -> Result<LoadStatus<'a, Item<'a>>, LoadErr> {
-        let factor =
-            Factor::load_next(last, expr)?.ok_or_else(|e| LoadErr::unexpect("Factor", e))?;
-        expr.next()
+        //load factor
+        let factor = Factor::load_next(last, expr)?
+            .ok_or_else(|e| LoadErr::unexpect("Factor", e, expr.get_postion()))?;
+        //load following
+        expr.preview()
+            //end iter can excepct
             .ok_or(LoadErr::IterEnd)
+            .or(Ok(ExprLexical::Nil))
+            //not expect sign can be accept
             .and_then(|last| SubItem::load_next(last, expr)?.into_ok())
             .or_else(|err| nil_sign(err, SubItem::Nil))?
-            .and_then(|sub| Item(factor.clone(), sub))
+            .and_then(|sub| Item(factor, sub))
             .into_ok()
     }
 }
@@ -35,20 +40,27 @@ where
             ExprLexical::CaculateSign(sign) => match sign {
                 '/' | '*' => {
                     //iter end and nil result
+                    expr.next().ok_or(LoadErr::IterEnd)?;
                     expr.next()
                         .ok_or(LoadErr::IterEnd)
                         .and_then(|op| {
-                            Factor::load_next(op, expr)?
-                                .ok_or_else(|exp| LoadErr::unexpect("Factor", exp))
+                            Factor::load_next(op, expr)?.ok_or_else(|exp| {
+                                LoadErr::unexpect("Factor", exp, expr.get_postion())
+                            })
                         })
-                        .and_then(|f| expr.next().ok_or(LoadErr::IterEnd).and_then(|e| Ok((f, e))))
+                        .and_then(|f| {
+                            expr.next()
+                                .ok_or(LoadErr::IterEnd)
+                                .or(Ok(ExprLexical::Nil))
+                                .and_then(|e| Ok((f, e)))
+                        })
                         .and_then(|last_expr| {
                             let (factor, last) = last_expr;
                             SubItem::load_next(last, expr).and_then(|d| Ok((d, factor)))
                         })
                         .and_then(|sub| {
                             let (sub, factor) = sub;
-                            sub.and_then(|sub| SubItem::new(factor.clone(), sub, sign))
+                            sub.and_then(|sub| SubItem::new(factor, sub, sign))
                                 .into_ok()
                         })
                         .or_else(|err| nil_sign(err, SubItem::Nil))?
@@ -56,6 +68,7 @@ where
                 }
                 _ => Ok(LoadStatus::ok(SubItem::Nil)),
             },
+            ExprLexical::Nil => Ok(LoadStatus::ok(SubItem::Nil)),
             e => Ok(LoadStatus::unmatch(e)),
         }
     }
@@ -119,6 +132,28 @@ mod test {
             Ok(LoadStatus::Success(Item(
                 Factor::Var(ExprVar(&v)),
                 SubItem::Multiple(Factor::Digit(11), Box::new(SubItem::Nil))
+            )))
+        )
+    }
+
+    #[test]
+    fn test_operate_digit_SS() {
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new("test_D+11");
+        let mut expr = ExprIter::new(&mut signs, iter);
+
+        let last = expr.next().unwrap();
+        let t = Item::load_next(last, &mut expr);
+
+        let v = Var {
+            name: "".to_string(),
+            value: Value::Int(-11),
+        };
+        assert_eq!(
+            t,
+            Ok(LoadStatus::Success(Item(
+                Factor::Var(ExprVar(&v)),
+                SubItem::Nil
             )))
         )
     }

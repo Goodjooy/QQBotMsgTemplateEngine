@@ -120,7 +120,7 @@ impl Display for ExprLexical<'_> {
     }
 }
 
-pub struct ExprIter<'a, S>(PreviewableIter<'a>, &'a S)
+pub struct ExprIter<'a, S>(PreviewableIter<'a>, &'a S, ExprLexical<'a>)
 where
     S: SignTableHandle;
 
@@ -131,13 +131,34 @@ where
     type Item = ExprLexical<'a>;
 
     fn next(&mut self) -> Option<Self::Item> {
-        ExprLexical::load_next(&mut self.0, self.1)
+        let temp = self.2.clone();
+        self.2 = ExprLexical::load_next(&mut self.0, self.1).or(Some(ExprLexical::Nil))?;
+
+        if temp == ExprLexical::Nil {
+            None
+        } else {
+            Some(temp)
+        }
     }
 }
 
 impl<'a, S: SignTableHandle> ExprIter<'a, S> {
-    pub fn new(signs: & 'a mut S, iter: PreviewableIter<'a>) -> Self {
-        ExprIter(iter, signs)
+    pub fn new(signs: &'a mut S, iter: PreviewableIter<'a>) -> Self {
+        let mut t = ExprIter(iter, signs, ExprLexical::Nil);
+        t.next();
+        t
+    }
+    pub fn get_postion(&self) -> (usize, usize) {
+        self.0.get_postion()
+    }
+
+    pub fn preview(&self) -> Option<ExprLexical<'a>> {
+        let temp=self.2.clone();
+        if ExprLexical::Nil == temp {
+            None
+        } else {
+            Some(temp)
+        }
     }
 }
 
