@@ -49,7 +49,7 @@ where
                             })
                         })
                         .and_then(|f| {
-                            expr.next()
+                            expr.preview()
                                 .ok_or(LoadErr::IterEnd)
                                 .or(Ok(ExprLexical::Nil))
                                 .and_then(|e| Ok((f, e)))
@@ -69,7 +69,7 @@ where
                 _ => Ok(LoadStatus::ok(SubItem::Nil)),
             },
             ExprLexical::Nil => Ok(LoadStatus::ok(SubItem::Nil)),
-            e => Ok(LoadStatus::unmatch(e)),
+            e => Ok(LoadStatus::ok(SubItem::Nil)),
         }
     }
 }

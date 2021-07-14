@@ -16,6 +16,10 @@ where
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
     ) -> Result<LoadStatus<'a, Literal>, LoadErr> {
-        todo!()
+        if let ExprLexical::Literal(s) = last {
+            Ok(LoadStatus::ok(Literal(s)))
+        } else {
+            Err(LoadErr::unexpect("Literal", last, expr.get_postion()))
+        }
     }
 }

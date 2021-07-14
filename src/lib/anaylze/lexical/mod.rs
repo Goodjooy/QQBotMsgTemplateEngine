@@ -1,12 +1,10 @@
-use core::str;
-use std::{cmp::PartialEq, fmt::Display, str::Chars};
+
+use std::{str::Chars};
 
 use util::*;
 
 
 use self::tag::Tag;
-
-use super::Sign;
 
 pub mod expr;
 pub mod iter;

@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use crate::lib::anaylze::lexical::PreviewableIter;
 
-use super::{Tag, TagAttr, TagStruct};
+use super::{TagAttr, TagStruct};
 
 impl TagStruct {
     pub fn new(name: String, attrs: HashMap<String, TagAttr>) -> Self {
