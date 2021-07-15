@@ -1,5 +1,5 @@
 
-items -> item Itens
+items -> item Items
 item -> literal | tag
 
 
@@ -8,7 +8,7 @@ literal->litral | litral_tag
 tag -> if
        | loops
         | var 
-        | img | at 
+        | img | at | text
 
 if -> <if mod="".... > items </if> elif
 

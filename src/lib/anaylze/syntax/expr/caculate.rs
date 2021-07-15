@@ -1,17 +1,19 @@
+use crate::lib::anaylze::PreviewIter;
 use crate::lib::anaylze::lexical::expr::{ExprIter, ExprLexical};
 use crate::lib::anaylze::syntax::{LoadErr, LoadStatus};
 use crate::lib::anaylze::{syntax::SyntaxLoadNext, SignTableHandle};
 
 use super::{nil_sign, Caculate, Item, SubCaculate};
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubCaculate<'a>> for SubCaculate<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubCaculate<'a>, ExprLexical<'a>>
+    for SubCaculate<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, SubCaculate<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< SubCaculate<'a>,ExprLexical<'a>>, LoadErr> {
         println!("{}", last);
         if let ExprLexical::CaculateSign(sign) = last {
             match sign {
@@ -49,14 +51,14 @@ where
     }
 }
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Caculate<'a>> for Caculate<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Caculate<'a> ,ExprLexical<'a>> for Caculate<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, Caculate<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Caculate<'a>,ExprLexical<'a>>, LoadErr> {
         let item = Item::load_next(last, expr)?
             .ok_or_else(|exp| LoadErr::unexpect("Item", exp, expr.get_postion()))?;
         expr.preview()
@@ -149,6 +151,24 @@ mod test {
                     Box::new(SubCaculate::Nil)
                 )
             )))
+        )
+    }
+
+    #[test]
+    fn test_operate_unsupport() {
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new("test_S+11");
+        let mut expr = ExprIter::new(&mut signs, iter);
+
+        let last = expr.next().unwrap();
+        let t = Caculate::load_next(last, &mut expr);
+
+        assert_eq!(
+            t,
+            Err(LoadErr::UnSupportOperate(
+                "Value:[name: `` , value: SSSS] Can Not Be Op<+, -, *, /> At line: 0 Offset: 7"
+                    .to_string()
+            ))
         )
     }
 }

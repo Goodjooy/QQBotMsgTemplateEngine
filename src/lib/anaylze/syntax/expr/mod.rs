@@ -44,11 +44,12 @@ pub enum Expression<'a> {
     Literal(Literal),
 }
 
-pub fn nil_sign<'a, T>(err: LoadErr, nil: T) -> Result<LoadStatus<'a, T>, LoadErr> {
+pub fn nil_sign<'a, T,N>(err: LoadErr, nil: T) -> Result<LoadStatus< T,N>, LoadErr> {
     println!("{:?}",err);
     match err {
         LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
-        LoadErr::UnexprectLetical(s) => Err(LoadErr::UnexprectLetical(s)),
+        LoadErr::UnexprectLetical(_)|LoadErr::UnSupportOperate(_) => Err(err),
+        
     }
 }
 
@@ -85,7 +86,7 @@ impl SignTableHandle for LexIter {
         }
     }
 
-    fn new_sign(&mut self, key: &str, value: crate::lib::anaylze::Sign) -> Option<()> {
+    fn new_sign(&mut self, _key: &str, _value: crate::lib::anaylze::Sign) -> Option<()> {
         None
     }
 }

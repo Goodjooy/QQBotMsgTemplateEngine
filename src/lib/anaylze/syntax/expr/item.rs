@@ -1,20 +1,21 @@
-use crate::lib::anaylze::lexical::expr::{self, ExprIter, ExprLexical};
+use crate::lib::anaylze::lexical::expr::{ExprIter, ExprLexical};
 use crate::lib::anaylze::syntax::{LoadErr, LoadStatus, SyntaxLoadNext};
-use crate::lib::anaylze::SignTableHandle;
+use crate::lib::anaylze::{PreviewIter, SignTableHandle};
 
 use super::{nil_sign, Factor, Item, SubItem};
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Item<'a>> for Item<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Item<'a>,ExprLexical<'a>> for Item<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, Item<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Item<'a>,ExprLexical<'a>>, LoadErr> {
         //load factor
         let factor = Factor::load_next(last, expr)?
-            .ok_or_else(|e| LoadErr::unexpect("Factor", e, expr.get_postion()))?;
+            .ok_or_else(|e| LoadErr::unexpect("Factor", e, expr.get_postion()))?
+            .can_caculate("+, -, *, /", expr.get_postion())?.unwrap();
         //load following
         expr.preview()
             //end iter can excepct
@@ -28,14 +29,14 @@ where
     }
 }
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubItem<'a>> for SubItem<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubItem<'a>,ExprLexical<'a>> for SubItem<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, SubItem<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< SubItem<'a>,ExprLexical<'a>>, LoadErr> {
         match last {
             ExprLexical::CaculateSign(sign) => match sign {
                 '/' | '*' => {
@@ -69,7 +70,7 @@ where
                 _ => Ok(LoadStatus::ok(SubItem::Nil)),
             },
             ExprLexical::Nil => Ok(LoadStatus::ok(SubItem::Nil)),
-            e => Ok(LoadStatus::ok(SubItem::Nil)),
+            _ => Ok(LoadStatus::ok(SubItem::Nil)),
         }
     }
 }
@@ -92,12 +93,10 @@ mod test {
         lib::anaylze::{
             lexical::PreviewableIter,
             syntax::{
-                self,
                 expr::{ExprVar, LexIter},
             },
             Var,
         },
-        test_data,
     };
 
     #[test]
@@ -137,7 +136,7 @@ mod test {
     }
 
     #[test]
-    fn test_operate_digit_SS() {
+    fn test_operate_digit_ss() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D+11");
         let mut expr = ExprIter::new(&mut signs, iter);
@@ -155,6 +154,21 @@ mod test {
                 Factor::Var(ExprVar(&v)),
                 SubItem::Nil
             )))
+        )
+    }
+
+    #[test]
+    fn test_operate_unsupport() {
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new("test_S*11");
+        let mut expr = ExprIter::new(&mut signs, iter);
+
+        let last = expr.next().unwrap();
+        let t = Item::load_next(last, &mut expr);
+
+        assert_eq!(
+            t,
+            Err(LoadErr::UnSupportOperate("Value:[name: `` , value: SSSS] Can Not Be Op<+, -, *, /> At line: 0 Offset: 7".to_string()))
         )
     }
 }

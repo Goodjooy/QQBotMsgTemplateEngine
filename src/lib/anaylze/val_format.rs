@@ -1,3 +1,4 @@
+use core::fmt::Display;
 use std::collections::vec_deque;
 
 use super::Value;
@@ -13,6 +14,7 @@ impl Value {
                 .reduce(|a, b| format!("{}, {}", a, b))
                 .and_then(|s| Some(format!("[{}]", s)))
                 .unwrap_or("%%Failure To String%%".to_string()),
+            Value::UnSet => String::from("Rander Time Set"),
         }
     }
     pub fn format(&self, format: &str) -> String {
@@ -24,6 +26,12 @@ impl Value {
             .replace("\0", "{{")
             .replace("{{", "{")
             .replace("}}", "}")
+    }
+}
+
+impl Display for Value {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f,"{}",self.to_string())
     }
 }
 

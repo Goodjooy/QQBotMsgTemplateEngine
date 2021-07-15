@@ -5,14 +5,14 @@ use crate::lib::anaylze::{syntax::SyntaxLoadNext, SignTableHandle};
 
 use super::Factor;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Factor<'a>> for Factor<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Factor<'a>,ExprLexical<'a>> for Factor<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, Factor<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Factor<'a>,ExprLexical<'a>>, LoadErr> {
         match last {
             ExprLexical::Digit(num) => Ok(LoadStatus::ok(Factor::Digit(num))),
             ExprLexical::Value(var) => match var {
@@ -45,10 +45,35 @@ where
     }
 }
 
+impl<'a> Factor<'a> {
+    pub fn can_caculate<'b>(
+        self,
+        op: &'b str,
+        pos: (usize, usize),
+    ) -> Result<LoadStatus< Factor<'a>,ExprLexical<'a>>, LoadErr> {
+        match self {
+            Factor::SubExpr(_) | Factor::Digit(_) => Ok(LoadStatus::ok(self)),
+
+            Factor::Var(v) => {
+                let ExprVar(sign) = v;
+                let value = &sign.value;
+                match value {
+                    crate::lib::anaylze::Value::UnSet | crate::lib::anaylze::Value::Int(_) => {
+                        Ok(LoadStatus::ok(Factor::Var(ExprVar(sign))))
+                    }
+                    crate::lib::anaylze::Value::Str(_) | crate::lib::anaylze::Value::List(_) => {
+                        Err(LoadErr::unsupport(sign, op, pos))
+                    }
+                }
+            }
+        }
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, SubItem};
-    use crate::lib::anaylze::{lexical::PreviewableIter, Sign, Value, Var};
+    use crate::lib::anaylze::{lexical::PreviewableIter, Value, Var};
 
     use super::*;
 
@@ -111,10 +136,7 @@ mod test {
             name: "".to_string(),
             value: Value::Int(11),
         };
-        let s = Var {
-            name: "".to_string(),
-            value: Value::Str("SSSS".to_string()),
-        };
+        
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Factor::SubExpr(Box::new(

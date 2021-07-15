@@ -17,8 +17,8 @@ pub enum Image {
 }
 
 pub struct Sign {
-    sign: String,
-    repeat: u32,
+    pub sign: String,
+    pub repeat: u32,
 }
 
 pub struct If<'a> {

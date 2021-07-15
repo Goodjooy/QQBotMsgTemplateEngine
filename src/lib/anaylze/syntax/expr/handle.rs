@@ -10,14 +10,14 @@ use crate::lib::anaylze::{
 
 use super::Expression;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Expression<'a>> for Expression<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Expression<'a>,ExprLexical<'a>> for Expression<'a>
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical<'a>,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus<'a, Expression<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Expression<'a>,ExprLexical<'a>>, LoadErr> {
         let ex = match last {
             ExprLexical::Literal(_) => Literal::load_next(last, expr)
                 .and_then(|f| Ok(f.and_then(|t| Expression::Literal(t)))),

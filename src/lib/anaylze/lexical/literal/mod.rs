@@ -1,7 +1,8 @@
 use crate::lib::anaylze::LoadNext;
 
 use super::{check_next_sign, clear_space, PreviewableIter};
-#[derive(Debug)]
+#[derive(Debug,Clone,PartialEq, PartialOrd)]
+
 pub struct Literal(String);
 
 impl LoadNext<Literal> for Literal {

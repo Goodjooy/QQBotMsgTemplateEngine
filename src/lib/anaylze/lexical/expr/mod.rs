@@ -1,5 +1,5 @@
 use super::{util::clear_space, PreviewableIter};
-use crate::lib::anaylze::{LoadNextWithSignTable, Sign, SignTableHandle};
+use crate::lib::anaylze::{LoadNextWithSignTable, PreviewIter, Sign, SignTableHandle};
 use std::fmt::Display;
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum ExprLexical<'a> {
@@ -141,6 +141,20 @@ where
         }
     }
 }
+impl<'a, S> PreviewIter for ExprIter<'a, S>
+where
+    S: SignTableHandle,
+{
+    fn preview(&self)->Option<Self::Item> {
+        let temp=self.2.clone();
+        if ExprLexical::Nil == temp {
+            None
+        } else {
+            Some(temp)
+        }
+    }
+}
+
 
 impl<'a, S: SignTableHandle> ExprIter<'a, S> {
     pub fn new(signs: &'a mut S, iter: PreviewableIter<'a>) -> Self {
@@ -150,15 +164,6 @@ impl<'a, S: SignTableHandle> ExprIter<'a, S> {
     }
     pub fn get_postion(&self) -> (usize, usize) {
         self.0.get_postion()
-    }
-
-    pub fn preview(&self) -> Option<ExprLexical<'a>> {
-        let temp=self.2.clone();
-        if ExprLexical::Nil == temp {
-            None
-        } else {
-            Some(temp)
-        }
     }
 }
 

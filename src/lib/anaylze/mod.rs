@@ -21,6 +21,7 @@ pub enum Sign {
 }
 #[derive(Debug,Clone,PartialEq, PartialOrd)]
 pub enum Value {
+    UnSet,
     Int(i64),
     Str(String),
     List(Vec<Value>),
@@ -48,3 +49,6 @@ pub trait LoadNextWithSignTable<'a, T> {
         S: SignTableHandle;
 }
 
+pub trait PreviewIter:Iterator {
+    fn preview(&self)->Option<Self::Item>;
+}

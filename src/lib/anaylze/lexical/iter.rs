@@ -46,6 +46,6 @@ impl<'a> PreviewableIter<'a> {
     }
 
     pub fn get_postion(&self) -> (usize, usize) {
-        (self.line, self.offset)
+        (self.line, self.offset - 1)
     }
 }
