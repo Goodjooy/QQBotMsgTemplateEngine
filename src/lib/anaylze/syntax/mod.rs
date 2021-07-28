@@ -7,11 +7,12 @@ use super::{PreviewIter, Var};
 mod expr;
 mod literal;
 
-pub trait SyntaxLoadNext<'a, I, T, L>
+pub trait SyntaxLoadNext<'a, I, L>
 where
     I: PreviewIter<Item = L>,
+    Self:Sized
 {
-    fn load_next(last: L, expr: &mut I) -> Result<LoadStatus<T, L>, LoadErr>;
+    fn load_next(last: L, expr: &mut I) -> Result<LoadStatus<Self, L>, LoadErr>;
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -83,6 +84,7 @@ pub enum LoadErr {
     IterEnd,
     UnexprectLetical(String),
     UnSupportOperate(String),
+    TargetAttrNotExist(String),
 }
 
 impl LoadErr {
@@ -98,6 +100,13 @@ impl LoadErr {
         LoadErr::UnSupportOperate(format!(
             "Value:[name: `{}` , value: {}] Can Not Be Op<{}> At line: {} Offset: {}",
             var.name, var.value, operate, line, offset
+        ))
+    }
+    pub fn attr_not_found<'a>(attr_name:&str,tag_name:&str, pos: (usize, usize)) -> LoadErr {
+        let (line, offset) = pos;
+        LoadErr::UnSupportOperate(format!(
+            "Attr:[name: {}] Can Not Be Found In Tag[name: {}] At line: {} Offset: {}",
+            attr_name,tag_name, line, offset
         ))
     }
 }

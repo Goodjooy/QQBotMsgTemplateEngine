@@ -10,14 +10,14 @@ use crate::lib::anaylze::{
 
 use super::Expression;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Expression<'a>,ExprLexical<'a>> for Expression<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Expression
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Expression<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Expression,ExprLexical>, LoadErr> {
         let ex = match last {
             ExprLexical::Literal(_) => Literal::load_next(last, expr)
                 .and_then(|f| Ok(f.and_then(|t| Expression::Literal(t)))),
@@ -34,7 +34,9 @@ where
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::cell::RefCell;
+use std::rc::Rc;
+use super::*;
     use crate::lib::anaylze::syntax::expr::{ExprVar, Factor, Item, LexIter, SubCaculate, SubItem};
     use crate::lib::anaylze::Var;
     use crate::lib::anaylze::{PreviewableIter, Value};
@@ -43,7 +45,7 @@ mod test {
     fn test_literal() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("'ababa'");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);
@@ -59,7 +61,7 @@ mod test {
     fn test_value() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);
@@ -71,7 +73,7 @@ mod test {
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Expression::Caculate(Caculate(
-                Item(Factor::Var(ExprVar(&v)), SubItem::Nil),
+                Item(Factor::Var(ExprVar(v)), SubItem::Nil),
                 SubCaculate::Nil
             ))))
         )
@@ -80,7 +82,7 @@ mod test {
     fn test_caculate() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D+11-22*(5-2)");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);
@@ -93,7 +95,7 @@ mod test {
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Expression::Caculate(Caculate(
-                Item(Factor::Var(ExprVar(&v)), SubItem::Nil),
+                Item(Factor::Var(ExprVar(v)), SubItem::Nil),
                 SubCaculate::Addition(
                     Item(Factor::Digit(11), SubItem::Nil),
                     Box::new(SubCaculate::Subtraction(

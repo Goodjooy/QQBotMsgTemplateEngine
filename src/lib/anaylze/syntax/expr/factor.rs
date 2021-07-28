@@ -5,14 +5,14 @@ use crate::lib::anaylze::{syntax::SyntaxLoadNext, SignTableHandle};
 
 use super::Factor;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Factor<'a>,ExprLexical<'a>> for Factor<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Factor
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Factor<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Factor,ExprLexical>, LoadErr> {
         match last {
             ExprLexical::Digit(num) => Ok(LoadStatus::ok(Factor::Digit(num))),
             ExprLexical::Value(var) => match var {
@@ -45,12 +45,12 @@ where
     }
 }
 
-impl<'a> Factor<'a> {
+impl<'a> Factor {
     pub fn can_caculate<'b>(
         self,
         op: &'b str,
         pos: (usize, usize),
-    ) -> Result<LoadStatus< Factor<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Factor,ExprLexical>, LoadErr> {
         match self {
             Factor::SubExpr(_) | Factor::Digit(_) => Ok(LoadStatus::ok(self)),
 
@@ -62,7 +62,7 @@ impl<'a> Factor<'a> {
                         Ok(LoadStatus::ok(Factor::Var(ExprVar(sign))))
                     }
                     crate::lib::anaylze::Value::Str(_) | crate::lib::anaylze::Value::List(_) => {
-                        Err(LoadErr::unsupport(sign, op, pos))
+                        Err(LoadErr::unsupport(&sign, op, pos))
                     }
                 }
             }
@@ -72,7 +72,9 @@ impl<'a> Factor<'a> {
 
 #[cfg(test)]
 mod test {
-    use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, SubItem};
+    use std::cell::RefCell;
+use std::rc::Rc;
+use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, SubItem};
     use crate::lib::anaylze::{lexical::PreviewableIter, Value, Var};
 
     use super::*;
@@ -81,7 +83,7 @@ mod test {
     fn test_load_digit() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
 
@@ -93,7 +95,7 @@ mod test {
     fn test_load_sign() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D test_U test_S");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -101,7 +103,7 @@ mod test {
             name: "".to_string(),
             value: Value::Int(-11),
         };
-        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(&d)))));
+        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(d)))));
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -109,7 +111,7 @@ mod test {
             name: "".to_string(),
             value: Value::Int(11),
         };
-        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(&d)))));
+        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(d)))));
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -117,13 +119,13 @@ mod test {
             name: "".to_string(),
             value: Value::Str("SSSS".to_string()),
         };
-        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(&d)))));
+        assert_eq!(t, Ok(LoadStatus::Success(Factor::Var(ExprVar(d)))));
     }
     #[test]
     fn test_sub() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("(test_D+test_U*22)*test_S-12");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -141,10 +143,10 @@ mod test {
             t,
             Ok(LoadStatus::Success(Factor::SubExpr(Box::new(
                 Expression::Caculate(Caculate(
-                    Item(Factor::Var(ExprVar(&d)), SubItem::Nil),
+                    Item(Factor::Var(ExprVar(d)), SubItem::Nil),
                     SubCaculate::Addition(
                         Item(
-                            Factor::Var(ExprVar(&i)),
+                            Factor::Var(ExprVar(i)),
                             SubItem::Multiple(Factor::Digit(22), Box::new(SubItem::Nil))
                         ),
                         Box::new(SubCaculate::Nil)

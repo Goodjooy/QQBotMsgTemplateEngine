@@ -1,4 +1,7 @@
 
+use std::borrow::Borrow;
+use std::cell::{Ref, RefCell, RefMut};
+use std::rc::Rc;
 use std::{collections::HashMap};
 
 
@@ -6,7 +9,8 @@ use super::{Sign, SignTableHandle};
 
 struct SignTable {
     table: HashMap<String, Sign>,
-    parent: Option<Box<SignTable>>,
+    parent: Option<Rc<RefCell<SignTable>>>,
+
 }
 
 impl SignTableHandle for SignTable {
@@ -15,7 +19,7 @@ impl SignTableHandle for SignTable {
         self.table.contains_key(key) || 
         //or in parent sign table
         match parent{
-            Some(pt) => pt.check_exist(key),
+            Some(pt) => Rc::clone(pt).borrow_mut().check_exist(key),
             None => false,
         }
     }
@@ -27,7 +31,8 @@ impl SignTableHandle for SignTable {
                let parent= &self.parent;
                match parent {
                 Some(p) => {
-                    p.get_sign(key)
+                    let t=p.borrow_mut();
+                    todo!()
                 },
                 None => None,
             } 
@@ -40,7 +45,7 @@ impl SignTableHandle for SignTable {
             None => {
                 let parent=&mut self.parent;
                 match parent {
-                    Some(ok) => {ok.get_mut_sign(key) },
+                    Some(ok) => {todo!() },
                     None => None,
                 }
             },
@@ -56,27 +61,36 @@ impl SignTableHandle for SignTable {
             Some(())
         }
     }
+
+    fn leave(s:Rc<RefCell<Self>>)->Option<Rc<RefCell<Self>>> {
+        let b=(s).borrow_mut().parent.clone();
+        return b;
+    }
+
+    fn enter(s:Rc<RefCell<Self>>)->Self {
+        Self::new_child(s)
+    }
+
+    
+     
 }
 
 impl SignTable {
     pub fn new_root()->Self{
         SignTable{
             table:HashMap::new(),
-            parent:None
+            parent:None,
+            
         }
     }
-    pub fn new_child(parent:SignTable)->Self{
-        SignTable{
+    pub fn new_child(parent: Rc<RefCell<SignTable>>)->SignTable{
+        let mut t=SignTable{
             table:HashMap::new(),
-            parent:Some(Box::new(parent))
-        }
+            parent:Some(parent),
+        };
+     
+        t
     }
 
-    pub fn leave(self)->Option<Self>{
-        self.parent.and_then(|f|Some(*f))
-    }
-
-    pub fn enter(self)->Self{
-        Self::new_child(self)
-    }
+    
 }

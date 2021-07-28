@@ -1,18 +1,19 @@
+use std::{cell::RefCell, rc::Rc};
 use super::{util::clear_space, PreviewableIter};
 use crate::lib::anaylze::{LoadNextWithSignTable, PreviewIter, Sign, SignTableHandle};
 use std::fmt::Display;
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum ExprLexical<'a> {
+pub enum ExprLexical {
     Nil,
     Literal(String),
     CaculateSign(char),
     GroupSign(char),
     Digit(i64),
-    Value(&'a Sign),
+    Value(Sign),
 }
 
-impl<'a> LoadNextWithSignTable<'a, ExprLexical<'a>> for ExprLexical<'a> {
-    fn load_next<S>(data: &mut PreviewableIter, sign_table: &'a S) -> Option<ExprLexical<'a>>
+impl<'a> LoadNextWithSignTable<'a, ExprLexical> for ExprLexical {
+    fn load_next<S>(data: &mut PreviewableIter, sign_table: Rc<RefCell<S>>) -> Option<ExprLexical>
     where
         S: SignTableHandle,
     {
@@ -40,13 +41,13 @@ impl<'a> LoadNextWithSignTable<'a, ExprLexical<'a>> for ExprLexical<'a> {
             }
         } else {
             let name = Self::read_sign_name(data)?;
-            let value = sign_table.get_sign(&name)?;
+            let value = sign_table.borrow().get_sign(&name)?.clone();
             Some(Self::Value(value))
         }
     }
 }
 
-impl ExprLexical<'_> {
+impl ExprLexical {
     fn read_digit(init: i64, data: &mut PreviewableIter) -> Option<i64> {
         let mut num: i64 = init;
         loop {
@@ -105,7 +106,7 @@ impl ExprLexical<'_> {
         }
     }
 }
-impl Display for ExprLexical<'_> {
+impl Display for ExprLexical {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             ExprLexical::Nil => write!(f, "UnKonw"),
@@ -120,7 +121,7 @@ impl Display for ExprLexical<'_> {
     }
 }
 
-pub struct ExprIter<'a, S>(PreviewableIter<'a>, &'a S, ExprLexical<'a>)
+pub struct ExprIter<'a, S>(PreviewableIter<'a>, Rc<RefCell<S>>, ExprLexical)
 where
     S: SignTableHandle;
 
@@ -128,11 +129,12 @@ impl<'a, S> Iterator for ExprIter<'a, S>
 where
     S: SignTableHandle,
 {
-    type Item = ExprLexical<'a>;
+    type Item = ExprLexical;
 
     fn next(&mut self) -> Option<Self::Item> {
         let temp = self.2.clone();
-        self.2 = ExprLexical::load_next(&mut self.0, self.1).or(Some(ExprLexical::Nil))?;
+        
+        self.2 = ExprLexical::load_next(&mut self.0, Rc::clone(&self.1)).or(Some(ExprLexical::Nil))?;
 
         if temp == ExprLexical::Nil {
             None
@@ -157,7 +159,7 @@ where
 
 
 impl<'a, S: SignTableHandle> ExprIter<'a, S> {
-    pub fn new(signs: &'a mut S, iter: PreviewableIter<'a>) -> Self {
+    pub fn new(signs: Rc<RefCell<S>>, iter: PreviewableIter<'a>) -> Self {
         let mut t = ExprIter(iter, signs, ExprLexical::Nil);
         t.next();
         t

@@ -4,14 +4,14 @@ use crate::lib::anaylze::{PreviewIter, SignTableHandle};
 
 use super::{nil_sign, Factor, Item, SubItem};
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Item<'a>,ExprLexical<'a>> for Item<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Item
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Item<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Item,ExprLexical>, LoadErr> {
         //load factor
         let factor = Factor::load_next(last, expr)?
             .ok_or_else(|e| LoadErr::unexpect("Factor", e, expr.get_postion()))?
@@ -29,14 +29,14 @@ where
     }
 }
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubItem<'a>,ExprLexical<'a>> for SubItem<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for SubItem
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< SubItem<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< SubItem,ExprLexical>, LoadErr> {
         match last {
             ExprLexical::CaculateSign(sign) => match sign {
                 '/' | '*' => {
@@ -75,8 +75,8 @@ where
     }
 }
 
-impl SubItem<'_> {
-    fn new<'a>(factor: Factor<'a>, sub: SubItem<'a>, sign: char) -> SubItem<'a> {
+impl SubItem {
+    fn new<'a>(factor: Factor, sub: SubItem, sign: char) -> SubItem {
         if sign == '/' {
             SubItem::Division(factor, Box::new(sub))
         } else {
@@ -87,7 +87,9 @@ impl SubItem<'_> {
 
 #[cfg(test)]
 mod test {
-    use super::*;
+    use std::cell::RefCell;
+use std::rc::Rc;
+use super::*;
     use crate::lib::anaylze::Value;
     use crate::{
         lib::anaylze::{
@@ -103,7 +105,7 @@ mod test {
     fn test_signle_digit() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("13");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
         let last = expr.next().unwrap();
         let t = Item::load_next(last, &mut expr);
 
@@ -117,7 +119,7 @@ mod test {
     fn test_operate_digit() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D*11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Item::load_next(last, &mut expr);
@@ -129,7 +131,7 @@ mod test {
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Item(
-                Factor::Var(ExprVar(&v)),
+                Factor::Var(ExprVar(v)),
                 SubItem::Multiple(Factor::Digit(11), Box::new(SubItem::Nil))
             )))
         )
@@ -139,7 +141,7 @@ mod test {
     fn test_operate_digit_ss() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D+11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Item::load_next(last, &mut expr);
@@ -151,7 +153,7 @@ mod test {
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Item(
-                Factor::Var(ExprVar(&v)),
+                Factor::Var(ExprVar(v)),
                 SubItem::Nil
             )))
         )
@@ -161,7 +163,7 @@ mod test {
     fn test_operate_unsupport() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_S*11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Item::load_next(last, &mut expr);

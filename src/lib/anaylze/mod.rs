@@ -1,5 +1,7 @@
 
-use std::fmt::Debug;
+use core::cell::RefMut;
+use std::cell::Ref;
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
 
 use self::lexical::PreviewableIter;
 mod lexical;
@@ -32,11 +34,14 @@ pub struct Var {
     pub value: Value,
 }
 
-pub trait SignTableHandle {
+pub trait SignTableHandle:Sized {
     fn check_exist(&self, key: &str) -> bool;
     fn get_sign(&self, key: &str) -> Option<&Sign>;
     fn get_mut_sign(&mut self, key: &str) -> Option<&mut Sign>;
     fn new_sign(&mut self, key: &str, value: Sign) -> Option<()>;
+
+    fn leave(s:Rc<RefCell<Self>>)->Option<Rc<RefCell<Self>>>;
+    fn enter(s:Rc<RefCell<Self>>)->Self;
 }
 
 pub trait LoadNext<T> {
@@ -44,7 +49,7 @@ pub trait LoadNext<T> {
 }
 
 pub trait LoadNextWithSignTable<'a, T> {
-    fn load_next<S>(data: &mut PreviewableIter, sign_table: &'a S) -> Option<T>
+    fn load_next<S>(data: &mut PreviewableIter, sign_table: Rc<RefCell<S>>) -> Option<T>
     where
         S: SignTableHandle;
 }

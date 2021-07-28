@@ -183,7 +183,7 @@ mod tag {
     fn test_clear_cmd() {
         let mut iter = PreviewableIter::new(r#"?/if mod="eq"?><if>"#);
 
-        let res = Tag::clear_comment(&mut iter).unwrap();
+        let _res = Tag::clear_comment(&mut iter).unwrap();
 
         assert_eq!(iter.next().unwrap(), '<')
     }

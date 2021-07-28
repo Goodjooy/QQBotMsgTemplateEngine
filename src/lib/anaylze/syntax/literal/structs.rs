@@ -3,7 +3,7 @@ use crate::lib::anaylze::syntax::expr::Expression;
 
 use crate::lib::anaylze::Value;
 
-use super::Item;
+use super::{Item, Items};
 
 pub struct Text<'a>(Box<Item<'a>>);
 
@@ -21,54 +21,55 @@ pub struct Sign {
     pub repeat: u32,
 }
 
-pub struct If<'a> {
-    model: CmpMod<'a>,
-    body: Box<Item<'a>>,
+pub struct If<'a>{
+    model: CmpMod,
+    body: Box<Items<'a>>,
 }
 
 pub struct Loop<'a> {
-    times: u32,
-    name: String,
+    pub times: Expression,
+    pub name: Option<String>,
 
-    body: Box<Item<'a>>,
+    pub body: Box<Items<'a>>,
 }
 
 pub struct For<'a> {
     source: &'a Value,
-    name: String,
+    name: Option<String>,
 
-    body: Box<Item<'a>>,
+    body: Box<Items<'a>>,
 }
 
 pub struct While<'a> {
-    model: CmpMod<'a>,
+    model: CmpMod,
 
-    body: Box<Item<'a>>,
+    body: Box<Items<'a>>,
 }
 
-pub enum CmpMod<'a> {
-    Eq(&'a Value, &'a Value),
-    Neq(&'a Value, &'a Value),
+pub enum CmpMod{
+    Eq(Expression, Expression),
+    Neq(Expression, Expression),
 
-    Gt(&'a Value, &'a Value),
-    Gte(&'a Value, &'a Value),
+    Gt(Expression, Expression),
+    Gte(Expression, Expression),
 
-    Lt(&'a Value, &'a Value),
-    Lte(&'a Value, &'a Value),
+    Lt(Expression, Expression),
+    Lte(Expression,Expression),
 
-    BoolT(&'a Value),
-    BoolF(&'a Value),
+    BoolT(Expression),
+    BoolF(Expression),
 }
 
-pub struct Var<'a> {
+pub struct Var {
     name:String,
-    op:ValueOperate<'a>
+    op:ValueOperate
 }
 
-pub enum ValueOperate<'a> {
-    Assign(Expression<'a>),
+pub enum ValueOperate{
+    OutSet,
     New,
-    NewDefault(Expression<'a>),
+    Assign(Expression),
+    NewDefault(Expression),
     Print(String),
     Println(String),
 }

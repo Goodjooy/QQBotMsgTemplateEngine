@@ -5,14 +5,14 @@ use lib::anaylze::syntax::{LoadErr, LoadStatus};
 
 use crate::lib::{self};
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Literal,ExprLexical<'a>> for Literal
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Literal
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Literal,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Literal,ExprLexical>, LoadErr> {
         if let ExprLexical::Literal(s) = last {
             Ok(LoadStatus::ok(Literal(s)))
         } else {

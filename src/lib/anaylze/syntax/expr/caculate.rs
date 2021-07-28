@@ -5,15 +5,15 @@ use crate::lib::anaylze::{syntax::SyntaxLoadNext, SignTableHandle};
 
 use super::{nil_sign, Caculate, Item, SubCaculate};
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, SubCaculate<'a>, ExprLexical<'a>>
-    for SubCaculate<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, ExprLexical>
+    for SubCaculate
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< SubCaculate<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< SubCaculate,ExprLexical>, LoadErr> {
         println!("{}", last);
         if let ExprLexical::CaculateSign(sign) = last {
             match sign {
@@ -51,14 +51,14 @@ where
     }
 }
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, Caculate<'a> ,ExprLexical<'a>> for Caculate<'a>
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S> ,ExprLexical> for Caculate
 where
     S: SignTableHandle,
 {
     fn load_next(
-        last: ExprLexical<'a>,
+        last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Caculate<'a>,ExprLexical<'a>>, LoadErr> {
+    ) -> Result<LoadStatus< Caculate,ExprLexical>, LoadErr> {
         let item = Item::load_next(last, expr)?
             .ok_or_else(|exp| LoadErr::unexpect("Item", exp, expr.get_postion()))?;
         expr.preview()
@@ -70,8 +70,8 @@ where
     }
 }
 
-impl<'a> SubCaculate<'a> {
-    fn new(sign: char, item: Item<'a>, sub: SubCaculate<'a>) -> Self {
+impl<'a> SubCaculate {
+    fn new(sign: char, item: Item, sub: SubCaculate) -> Self {
         if sign == '+' {
             SubCaculate::Addition(item, Box::new(sub))
         } else {
@@ -83,7 +83,9 @@ impl<'a> SubCaculate<'a> {
 #[cfg(test)]
 mod test {
 
-    use super::*;
+    use std::cell::RefCell;
+    use std::rc::Rc;
+use super::*;
     use crate::lib::anaylze::syntax::expr::{Factor, LexIter, SubItem};
     use crate::lib::anaylze::PreviewableIter;
 
@@ -91,7 +93,7 @@ mod test {
     fn test_digit() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let t = expr.next().unwrap();
 
@@ -110,7 +112,7 @@ mod test {
     fn test_add_and_min() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("11+22-11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let t = expr.next().unwrap();
         println!("{:}", t);
@@ -134,7 +136,7 @@ mod test {
     fn test_add_and_min_and_higher() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("11+22*11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let t = expr.next().unwrap();
         println!("{:}", t);
@@ -158,7 +160,7 @@ mod test {
     fn test_operate_unsupport() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_S+11");
-        let mut expr = ExprIter::new(&mut signs, iter);
+        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
 
         let last = expr.next().unwrap();
         let t = Caculate::load_next(last, &mut expr);

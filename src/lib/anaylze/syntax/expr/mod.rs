@@ -1,6 +1,6 @@
-use crate::lib::anaylze::Value;
-use crate::lib::anaylze::SignTableHandle;
 use crate::lib::anaylze::Sign;
+use crate::lib::anaylze::SignTableHandle;
+use crate::lib::anaylze::Value;
 use crate::lib::anaylze::Var;
 
 use super::{LoadErr, LoadStatus};
@@ -14,42 +14,43 @@ mod literal;
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub struct Literal(String);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct ExprVar<'a>(&'a Var);
+pub struct ExprVar(Var);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum Factor<'a> {
+pub enum Factor {
     Digit(i64),
-    SubExpr(Box<Expression<'a>>),
-    Var(ExprVar<'a>),
+    SubExpr(Box<Expression>),
+    Var(ExprVar),
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum SubItem<'a> {
-    Multiple(Factor<'a>, Box<SubItem<'a>>),
-    Division(Factor<'a>, Box<SubItem<'a>>),
+pub enum SubItem {
+    Multiple(Factor, Box<SubItem>),
+    Division(Factor, Box<SubItem>),
     Nil,
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Item<'a>(Factor<'a>, SubItem<'a>);
+pub struct Item(Factor, SubItem);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum SubCaculate<'a> {
-    Addition(Item<'a>, Box<SubCaculate<'a>>),
-    Subtraction(Item<'a>, Box<SubCaculate<'a>>),
+pub enum SubCaculate {
+    Addition(Item, Box<SubCaculate>),
+    Subtraction(Item, Box<SubCaculate>),
     Nil,
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Caculate<'a>(Item<'a>, SubCaculate<'a>);
+pub struct Caculate(Item, SubCaculate);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub enum Expression<'a> {
-    Caculate(Caculate<'a>),
+pub enum Expression {
+    Caculate(Caculate),
     Literal(Literal),
 }
 
-pub fn nil_sign<'a, T,N>(err: LoadErr, nil: T) -> Result<LoadStatus< T,N>, LoadErr> {
-    println!("{:?}",err);
+pub fn nil_sign<'a, T, N>(err: LoadErr, nil: T) -> Result<LoadStatus<T, N>, LoadErr> {
+    println!("{:?}", err);
     match err {
         LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
-        LoadErr::UnexprectLetical(_)|LoadErr::UnSupportOperate(_) => Err(err),
-        
+        LoadErr::UnexprectLetical(_)
+        | LoadErr::UnSupportOperate(_)
+        | LoadErr::TargetAttrNotExist(_) => Err(err),
     }
 }
 
@@ -89,15 +90,37 @@ impl SignTableHandle for LexIter {
     fn new_sign(&mut self, _key: &str, _value: crate::lib::anaylze::Sign) -> Option<()> {
         None
     }
+
+  
+
+    fn enter(s:std::rc::Rc<std::cell::RefCell<Self>>)->Self {
+        todo!()
+    }
+
+    fn leave(s:std::rc::Rc<std::cell::RefCell<Self>>)->Option<std::rc::Rc<std::cell::RefCell<Self>>> {
+        todo!()
+    }
+
+   
+
+  
 }
 
 impl LexIter {
-    fn new()->Self{
-        LexIter{
-            d:Sign::Var(Var{name:"".to_string(),value:Value::Int(-11)}),
-            u:Sign::Var(Var{name:"".to_string(),value:Value::Int(11)}),
-            s:Sign::Var(Var{name:"".to_string(),value:Value::Str("SSSS".to_string())}),
-
+    fn new() -> Self {
+        LexIter {
+            d: Sign::Var(Var {
+                name: "".to_string(),
+                value: Value::Int(-11),
+            }),
+            u: Sign::Var(Var {
+                name: "".to_string(),
+                value: Value::Int(11),
+            }),
+            s: Sign::Var(Var {
+                name: "".to_string(),
+                value: Value::Str("SSSS".to_string()),
+            }),
         }
     }
 }
@@ -105,8 +128,8 @@ impl LexIter {
 #[macro_export]
 macro_rules! test_data {
     ($x:expr) => {
-        let mut signs=LexIter::new();
-        let iter=PreviewableIter::new(stringify!(x));
-        let mut expr=ExprIter::new(&mut signs, iter);
+        let mut signs = LexIter::new();
+        let iter = PreviewableIter::new(stringify!(x));
+        let mut expr = ExprIter::new(&mut signs, iter);
     };
 }
