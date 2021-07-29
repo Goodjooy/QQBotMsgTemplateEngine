@@ -1,5 +1,3 @@
-use std::cell::RefMut;
-use std::{cell::RefCell, rc::Rc};
 use std::str::Chars;
 
 use util::*;
@@ -30,7 +28,7 @@ pub struct LexicalHandle<'a> {
     data: PreviewableIter<'a>,
 }
 
-pub struct OutDataLoader<'a, S>(LexicalHandle<'a>, Rc<RefCell<S>>, LexicalType)
+pub struct OutDataLoader<'a, S>(LexicalHandle<'a>, & 'a mut S, LexicalType)
 where
     S: SignTableHandle;
 
@@ -60,7 +58,7 @@ impl<'a, S: SignTableHandle> PreviewIter for OutDataLoader<'a, S> {
 }
 
 impl<'a, S: SignTableHandle> OutDataLoader<'a, S> {
-    pub fn new(signs: Rc<RefCell<S>>, iter: PreviewableIter<'a>) -> Self {
+    pub fn new(signs: & 'a mut S, iter: PreviewableIter<'a>) -> Self {
         let mut t = OutDataLoader(LexicalHandle { data: iter }, signs, LexicalType::Nil);
         t.next();
         return t;
@@ -70,18 +68,14 @@ impl<'a, S: SignTableHandle> OutDataLoader<'a, S> {
         self.0.data.get_postion()
     }
 
-    pub fn get_sign_table(&mut self)->Rc<RefCell<S>>{
-        Rc::clone(&self.1)
+    pub fn get_sign_table(&mut self)->& mut S{
+        self.1
     }
     pub fn into_child(&mut self){
-        let s=Rc::clone(&self.1);
-        let s=S::enter( s);
-        self.1=Rc::new(RefCell::new(s));
+        self.1.enter()
     }
     pub fn leave_child(&mut self)->Option<()>{
-        let s=Rc::clone(&self.1);
-        let ps=S::leave(s)?;
-        self.1=ps;
+        self.1.leave();
         Some(())
     }
 }

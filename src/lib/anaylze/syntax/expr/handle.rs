@@ -10,14 +10,14 @@ use crate::lib::anaylze::{
 
 use super::Expression;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Expression
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, ExprLexical> for Expression
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Expression,ExprLexical>, LoadErr> {
+    ) -> Result<LoadStatus<Expression, ExprLexical>, LoadErr> {
         let ex = match last {
             ExprLexical::Literal(_) => Literal::load_next(last, expr)
                 .and_then(|f| Ok(f.and_then(|t| Expression::Literal(t)))),
@@ -34,9 +34,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use std::cell::RefCell;
-use std::rc::Rc;
-use super::*;
+    use super::*;
     use crate::lib::anaylze::syntax::expr::{ExprVar, Factor, Item, LexIter, SubCaculate, SubItem};
     use crate::lib::anaylze::Var;
     use crate::lib::anaylze::{PreviewableIter, Value};
@@ -45,7 +43,7 @@ use super::*;
     fn test_literal() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("'ababa'");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);
@@ -61,7 +59,7 @@ use super::*;
     fn test_value() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);
@@ -82,7 +80,7 @@ use super::*;
     fn test_caculate() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D+11-22*(5-2)");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
         let t = Expression::load_next(last, &mut expr);

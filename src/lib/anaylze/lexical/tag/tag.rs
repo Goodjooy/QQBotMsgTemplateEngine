@@ -26,11 +26,18 @@ impl TagStruct {
     pub fn get(&self, key: &str) -> Option<TagAttr> {
         self.attrs.get(key).and_then(|f| Some(f.clone()))
     }
+
+    pub fn get_default(&self,key:&str,default:&str)->TagAttr{
+        self.attrs.get(key).and_then(|f| Some(f.clone())).unwrap_or(TagAttr(default.to_string()))
+    }
 }
 
 impl TagAttr {
     pub fn get_raw(&self) -> &str {
         &self.0
+    }
+    pub fn get_raw_owner(self)->String{
+        self.0
     }
     pub fn get_iter<'a>(&'a self) -> PreviewableIter<'a> {
         self.iter()

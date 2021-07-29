@@ -91,19 +91,13 @@ impl SignTableHandle for LexIter {
         None
     }
 
-  
-
-    fn enter(s:std::rc::Rc<std::cell::RefCell<Self>>)->Self {
+    fn leave(&mut self) {
         todo!()
     }
 
-    fn leave(s:std::rc::Rc<std::cell::RefCell<Self>>)->Option<std::rc::Rc<std::cell::RefCell<Self>>> {
+    fn enter(&mut self) {
         todo!()
     }
-
-   
-
-  
 }
 
 impl LexIter {

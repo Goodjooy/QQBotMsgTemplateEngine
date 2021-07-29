@@ -5,14 +5,14 @@ use crate::lib::anaylze::{syntax::SyntaxLoadNext, SignTableHandle};
 
 use super::Factor;
 
-impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>,ExprLexical> for Factor
+impl<'a, S> SyntaxLoadNext<'a, ExprIter<'a, S>, ExprLexical> for Factor
 where
     S: SignTableHandle,
 {
     fn load_next(
         last: ExprLexical,
         expr: &mut ExprIter<'a, S>,
-    ) -> Result<LoadStatus< Factor,ExprLexical>, LoadErr> {
+    ) -> Result<LoadStatus<Factor, ExprLexical>, LoadErr> {
         match last {
             ExprLexical::Digit(num) => Ok(LoadStatus::ok(Factor::Digit(num))),
             ExprLexical::Value(var) => match var {
@@ -50,7 +50,7 @@ impl<'a> Factor {
         self,
         op: &'b str,
         pos: (usize, usize),
-    ) -> Result<LoadStatus< Factor,ExprLexical>, LoadErr> {
+    ) -> Result<LoadStatus<Factor, ExprLexical>, LoadErr> {
         match self {
             Factor::SubExpr(_) | Factor::Digit(_) => Ok(LoadStatus::ok(self)),
 
@@ -72,9 +72,7 @@ impl<'a> Factor {
 
 #[cfg(test)]
 mod test {
-    use std::cell::RefCell;
-use std::rc::Rc;
-use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, SubItem};
+    use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, SubItem};
     use crate::lib::anaylze::{lexical::PreviewableIter, Value, Var};
 
     use super::*;
@@ -83,7 +81,7 @@ use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, Su
     fn test_load_digit() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("11");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
 
@@ -95,7 +93,7 @@ use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, Su
     fn test_load_sign() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("test_D test_U test_S");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -125,7 +123,7 @@ use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, Su
     fn test_sub() {
         let mut signs = LexIter::new();
         let iter = PreviewableIter::new("(test_D+test_U*22)*test_S-12");
-        let mut expr = ExprIter::new(Rc::new(RefCell::new(signs)), iter);
+        let mut expr = ExprIter::new(&mut signs, iter);
 
         let last = expr.next().unwrap();
         let t = Factor::load_next(last, &mut expr);
@@ -138,7 +136,6 @@ use crate::lib::anaylze::syntax::expr::{Caculate, Item, LexIter, SubCaculate, Su
             name: "".to_string(),
             value: Value::Int(11),
         };
-        
         assert_eq!(
             t,
             Ok(LoadStatus::Success(Factor::SubExpr(Box::new(

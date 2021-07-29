@@ -1,96 +1,83 @@
-
-use std::borrow::Borrow;
-use std::cell::{Ref, RefCell, RefMut};
-use std::rc::Rc;
-use std::{collections::HashMap};
-
+use std::collections::HashMap;
 
 use super::{Sign, SignTableHandle};
 
 struct SignTable {
-    table: HashMap<String, Sign>,
-    parent: Option<Rc<RefCell<SignTable>>>,
-
+    tables: Vec<HashMap<String, Sign>>,
+    depath: usize,
 }
 
 impl SignTableHandle for SignTable {
     fn check_exist(&self, key: &str) -> bool {
-        let parent=&self.parent;
-        self.table.contains_key(key) || 
-        //or in parent sign table
-        match parent{
-            Some(pt) => Rc::clone(pt).borrow_mut().check_exist(key),
-            None => false,
+        let size = self.depath;
+        let range = 0..size;
+
+        for index in range.rev() {
+            match self.tables.get(index) {
+                Some(d) => {
+                    if d.contains_key(key) {
+                        return true;
+                    }
+                }
+                None => continue,
+            };
         }
+        return false;
     }
 
     fn get_sign(&self, key: &str) -> Option<&Sign> {
-        self.table.get(key)
-        .or_else(
-            || {
-               let parent= &self.parent;
-               match parent {
-                Some(p) => {
-                    let t=p.borrow_mut();
-                    todo!()
-                },
-                None => None,
-            } 
-        })
+        let size = self.depath;
+        let range = 0..size;
+
+        for index in range.rev() {
+            match self.tables.get(index) {
+                Some(d) => {
+                    if d.contains_key(key) {
+                        return d.get(key);
+                    }
+                }
+                None => continue,
+            };
+        }
+        return None;
     }
     /// child can edit parent value and self value
-    
     fn get_mut_sign(&mut self, key: &str) -> Option<&mut Sign> {
-        match self.table.get_mut(key){
-            None => {
-                let parent=&mut self.parent;
-                match parent {
-                    Some(ok) => {todo!() },
-                    None => None,
-                }
-            },
-            ok=>ok,
-        }
+        self.tables
+            .iter_mut()
+            .filter(|map| map.contains_key(key))
+            .last()
+            .and_then(|f| f.get_mut(key))
     }
 
     fn new_sign(&mut self, key: &str, value: Sign) -> Option<()> {
-        if self.check_exist(key) {
-            None
-        } else {
-            self.table.insert(key.to_string(), value);
-            Some(())
-        }
+        self.tables
+            .last_mut()
+            .and_then(|f| if f.contains_key(key) { None } else { Some(f) })
+            .and_then(|f| f.insert(key.to_string(), value))
+            .and_then(|_| Some(()))
     }
 
-    fn leave(s:Rc<RefCell<Self>>)->Option<Rc<RefCell<Self>>> {
-        let b=(s).borrow_mut().parent.clone();
-        return b;
+    fn leave(&mut self) {
+        self.tables.pop();
+        self.depath = self.tables.len();
     }
 
-    fn enter(s:Rc<RefCell<Self>>)->Self {
-        Self::new_child(s)
+    fn enter(&mut self) {
+        self.new_child();
     }
-
-    
-     
 }
 
 impl SignTable {
-    pub fn new_root()->Self{
-        SignTable{
-            table:HashMap::new(),
-            parent:None,
-            
+    pub fn new_root() -> Self {
+        SignTable {
+            tables: vec![HashMap::new()],
+            depath: 1,
         }
     }
-    pub fn new_child(parent: Rc<RefCell<SignTable>>)->SignTable{
-        let mut t=SignTable{
-            table:HashMap::new(),
-            parent:Some(parent),
-        };
-     
-        t
-    }
 
-    
+    pub fn new_child(&mut self) {
+        self.tables.push(HashMap::new());
+        self.depath = self.tables.len();
+    }
 }

@@ -1,4 +1,3 @@
-use std::{cell::RefCell, rc::Rc};
 use super::{util::clear_space, PreviewableIter};
 use crate::lib::anaylze::{LoadNextWithSignTable, PreviewIter, Sign, SignTableHandle};
 use std::fmt::Display;
@@ -13,7 +12,7 @@ pub enum ExprLexical {
 }
 
 impl<'a> LoadNextWithSignTable<'a, ExprLexical> for ExprLexical {
-    fn load_next<S>(data: &mut PreviewableIter, sign_table: Rc<RefCell<S>>) -> Option<ExprLexical>
+    fn load_next<S>(data: &mut PreviewableIter, sign_table: &'a mut S) -> Option<ExprLexical>
     where
         S: SignTableHandle,
     {
@@ -41,7 +40,7 @@ impl<'a> LoadNextWithSignTable<'a, ExprLexical> for ExprLexical {
             }
         } else {
             let name = Self::read_sign_name(data)?;
-            let value = sign_table.borrow().get_sign(&name)?.clone();
+            let value = sign_table.get_sign(&name)?.clone();
             Some(Self::Value(value))
         }
     }
@@ -121,7 +120,7 @@ impl Display for ExprLexical {
     }
 }
 
-pub struct ExprIter<'a, S>(PreviewableIter<'a>, Rc<RefCell<S>>, ExprLexical)
+pub struct ExprIter<'a, S>(PreviewableIter<'a>, &'a mut S, ExprLexical)
 where
     S: SignTableHandle;
 
@@ -133,8 +132,7 @@ where
 
     fn next(&mut self) -> Option<Self::Item> {
         let temp = self.2.clone();
-        
-        self.2 = ExprLexical::load_next(&mut self.0, Rc::clone(&self.1)).or(Some(ExprLexical::Nil))?;
+        self.2 = ExprLexical::load_next(&mut self.0, self.1).or(Some(ExprLexical::Nil))?;
 
         if temp == ExprLexical::Nil {
             None
@@ -147,8 +145,8 @@ impl<'a, S> PreviewIter for ExprIter<'a, S>
 where
     S: SignTableHandle,
 {
-    fn preview(&self)->Option<Self::Item> {
-        let temp=self.2.clone();
+    fn preview(&self) -> Option<Self::Item> {
+        let temp = self.2.clone();
         if ExprLexical::Nil == temp {
             None
         } else {
@@ -157,9 +155,8 @@ where
     }
 }
 
-
 impl<'a, S: SignTableHandle> ExprIter<'a, S> {
-    pub fn new(signs: Rc<RefCell<S>>, iter: PreviewableIter<'a>) -> Self {
+    pub fn new(signs: &'a mut S, iter: PreviewableIter<'a>) -> Self {
         let mut t = ExprIter(iter, signs, ExprLexical::Nil);
         t.next();
         t
