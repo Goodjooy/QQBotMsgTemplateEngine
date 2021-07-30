@@ -59,7 +59,7 @@ impl<'a> Factor {
                 let ExprVar(sign) = v;
                 let value = &sign.value;
                 match value {
-                    crate::lib::anaylze::Value::UnSet | crate::lib::anaylze::Value::Int(_) => {
+                    crate::lib::anaylze::Value::UnSet(_) | crate::lib::anaylze::Value::Int(_) => {
                         Ok(LoadStatus::ok(Factor::Var(ExprVar(sign))))
                     }
                     crate::lib::anaylze::Value::Str(_) | crate::lib::anaylze::Value::List(_) => {

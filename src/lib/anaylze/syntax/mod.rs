@@ -4,8 +4,8 @@ use crate::lib::anaylze::lexical::expr::ExprLexical;
 
 use super::{PreviewIter, Var};
 
-mod expr;
-mod literal;
+pub mod expr;
+pub mod literal;
 
 pub trait SyntaxLoadNext<'a, I, L>
 where

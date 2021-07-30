@@ -1,71 +1,79 @@
 use std::{collections::HashMap, fmt::format};
 
-
-
-enum MidData {
+pub enum MidData {
     Text(String),
-    FormatText(String,Vec<TempValue>),
+    FormatText(String, Vec<TempValue>),
     Image(Image),
-    At{target:u64},
+    At { target: u64 },
 
-    IfTrueMove(TempValue,MoveOffset),
-    IfFalseMove(TempValue,MoveOffset),
+    IfTrueMove(TempValue, MoveOffset),
+    IfFalseMove(TempValue, MoveOffset),
 
-    SetTemp(TempValue),
-    Add(String,TempValue,TempValue),
-    Sub(String,TempValue,TempValue),
-    Mul(String,TempValue,TempValue),
-    Div(String,TempValue,TempValue),
+    SetTemp(String, TempValue),
+    Add(String, TempValue, TempValue),
+    Sub(String, TempValue, TempValue),
+    Mul(String, TempValue, TempValue),
+    Div(String, TempValue, TempValue),
 }
 
-struct Image{
-    id:Option<String>,
-    url:Option<String>,
-    path:Option<String>,
-    base64:Option<String>
+impl MidData {
+    pub fn get_sign(&self) -> Option<&String> {
+        match self {
+            Self::SetTemp(s, _)
+            | Self::Add(s, _, _)
+            | Self::Sub(s, _, _)
+            | Self::Mul(s, _, _)
+            | Self::Div(s, _, _) => Some(s),
+            _ => None,
+        }
+    }
 }
 
-enum TempValue {
+pub struct Image {
+    id: Option<String>,
+    url: Option<String>,
+    path: Option<String>,
+    base64: Option<String>,
+}
+
+pub enum TempValue {
     Int(i64),
     Str(String),
     Bool(bool),
-    Sign(String)
+    List(Vec<TempValue>),
+    Sign(String),
 }
 
-type MoveOffset=isize;
-
+type MoveOffset = isize;
 
 pub trait IntoMid {
-    fn into_mid(self,id_generator:&mut SignIdGenerator)->Vec<MidData>;
+    fn into_mid(self, id_generator: &mut SignIdGenerator) -> Vec<MidData>;
 }
-
 
 pub struct SignIdGenerator(usize);
 impl SignIdGenerator {
-    pub fn new()->Self{
+    pub fn new() -> Self {
         Self(0)
     }
-    pub fn next_id(&mut self)->String{
-        self.0+=1;
-       format!("t_{}", self.0)
+    pub fn next_id(&mut self) -> String {
+        self.0 += 1;
+        format!("t_{}", self.0)
     }
 }
 
-pub struct MidSignTable(HashMap<usize,TempValue>,usize) ;
+pub struct MidSignTable(HashMap<usize, TempValue>, usize);
 impl MidSignTable {
-    pub fn new()->Self{
-        MidSignTable(HashMap::new(),0)
+    pub fn new() -> Self {
+        MidSignTable(HashMap::new(), 0)
     }
 
-    pub fn set_sign(&mut self,value:TempValue)->usize{
+    pub fn set_sign(&mut self, value: TempValue) -> usize {
         self.0.insert(self.1, value);
-        self.1+=1;
+        self.1 += 1;
         self.1
     }
 
-    pub fn get_sign(&self,id:usize)->Option<&TempValue>{
+    pub fn get_sign(&self, id: usize) -> Option<&TempValue> {
         self.0.get(&id)
     }
-
-
 }

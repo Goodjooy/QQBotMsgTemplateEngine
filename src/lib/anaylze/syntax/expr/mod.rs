@@ -12,9 +12,9 @@ mod item;
 mod literal;
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Literal(String);
+pub struct Literal(pub String);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct ExprVar(Var);
+pub struct ExprVar(pub Var);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Factor {
     Digit(i64),

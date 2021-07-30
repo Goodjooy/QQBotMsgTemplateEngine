@@ -1,3 +1,5 @@
+use crate::lib::mid_output::TempValue;
+
 use super::{Sign, Value, Var};
 use std::ops::{Add, Div, Mul, Sub};
 
@@ -25,9 +27,9 @@ impl Sign {
             None
         }
     }
-    pub fn into_value(&self) -> Option<& Value> {
+    pub fn into_value(&self) -> Option<&Value> {
         if let Self::Var(v) = self {
-            Some(& v.value)
+            Some(&v.value)
         } else {
             None
         }
@@ -41,12 +43,21 @@ impl Value {
             value: self,
         }
     }
+
+    pub fn into_temp(self) -> TempValue {
+        match self {
+            Value::UnSet(n) => TempValue::Sign(n),
+            Value::Int(i) => TempValue::Int(i),
+            Value::Str(s) => TempValue::Str(s),
+            Value::List(l) => TempValue::List(l.into_iter().map(|f| f.into_temp()).collect()),
+        }
+    }
 }
 
 impl Value {
     pub fn set_as(&mut self, target: Self) -> Option<()> {
         match self {
-            Value::UnSet => *self = target,
+            Value::UnSet(_) => *self = target,
             Value::Int(_) => {
                 if let Value::Int(is) = target {
                     *self = Value::Int(is)

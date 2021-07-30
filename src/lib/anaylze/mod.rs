@@ -25,7 +25,7 @@ pub enum Sign {
 }
 #[derive(Debug,Clone,PartialEq, PartialOrd)]
 pub enum Value {
-    UnSet,
+    UnSet(String),
     Int(i64),
     Str(String),
     List(Vec<Value>),
