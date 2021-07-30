@@ -1,4 +1,3 @@
-use crate::lib::anaylze::lexical::expr::ExprIter;
 use crate::lib::anaylze::syntax::literal::Literal;
 use crate::lib::anaylze::Sign;
 use crate::lib::anaylze::Value;
@@ -6,7 +5,7 @@ use crate::lib::anaylze::Var;
 
 use crate::lib::anaylze::lexical::LexicalType;
 use crate::lib::anaylze::lexical::OutDataLoader;
-use crate::lib::anaylze::syntax::expr::Expression;
+use crate::lib::anaylze::syntax::literal::util::check_end_tag;
 use crate::lib::anaylze::syntax::literal::util::check_tag_name;
 use crate::lib::anaylze::syntax::literal::util::load_express;
 use crate::lib::anaylze::syntax::literal::Item;
@@ -18,7 +17,10 @@ use crate::lib::anaylze::syntax::LoadStatus;
 use crate::lib::anaylze::syntax::SyntaxLoadNext;
 use crate::lib::anaylze::SignTableHandle;
 
-impl<'a, S: SignTableHandle> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop<'a> {
+impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop<'a>
+where
+    S: SignTableHandle,
+{
     fn load_next(
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
@@ -40,6 +42,11 @@ impl<'a, S: SignTableHandle> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalTyp
             }
             //TODO: ItemsLoader
             let body: Items = Items(ItemMeta::Literal(Literal("test".to_string())), Item::Nil);
+
+            //load end tag
+            let end_tag=expr.next().ok_or(LoadErr::IterEnd)?;
+            check_end_tag(&end_tag, "loop", expr.get_postion())?;
+
             let res = Loop {
                 times: times_expr,
                 name: loop_time_name,

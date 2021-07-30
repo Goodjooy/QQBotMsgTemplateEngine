@@ -180,7 +180,7 @@ mod test {
         let value= table.get_mut_sign("test1").unwrap();
 
         if value.is_value(){
-            let value=value.into_value().unwrap();
+            let value=value.into_value_mut().unwrap();
             if let Value::Int(i)=value{
                 *i+=11;
             }
@@ -194,6 +194,6 @@ mod test {
 
         table.enter();
 
-        
+
     }
 }

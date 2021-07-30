@@ -1,3 +1,4 @@
+use crate::lib::anaylze::lexical::tag::TagAttr;
 use crate::lib::anaylze::syntax::literal::ExprIter;
 use crate::lib::anaylze::syntax::SyntaxLoadNext;
 use crate::lib::anaylze::SignTableHandle;
@@ -45,9 +46,7 @@ pub fn load_express<S: SignTableHandle>(
     pos: (usize, usize),
     sign_table: &mut S,
 ) -> Result<Expression, LoadErr> {
-    let target_literal =
-        tag.get(key)
-            .ok_or(LoadErr::attr_not_found(key, tag.get_name(), pos))?;
+    let target_literal = load_attr(tag, key, pos)?;
     let expr_iter = target_literal.get_iter();
     let mut expr_iter = ExprIter::new(sign_table, expr_iter);
     let expr_last = expr_iter.next().ok_or(LoadErr::IterEnd)?;
@@ -55,4 +54,33 @@ pub fn load_express<S: SignTableHandle>(
         .ok_or_else(|f| LoadErr::unexpect("Expression", f, expr_iter.get_postion()));
 
     target_expr
+}
+
+pub fn load_attr(tag: &TagStruct, key: &str, pos: (usize, usize)) -> Result<TagAttr, LoadErr> {
+    tag.get(key)
+        .ok_or(LoadErr::attr_not_found(key, tag.get_name(), pos))
+}
+pub fn check_end_tag(
+    ty: &LexicalType,
+    except_name: &str,
+    pos: (usize, usize),
+) -> Result<(), LoadErr> {
+    match ty {
+        LexicalType::Tag(t) => {
+            if let crate::lib::anaylze::lexical::tag::Tag::CloseTag(s) = t {
+                if s == except_name {
+                    Ok(())
+                } else {
+                    Err(LoadErr::unexpect(
+                        &format!("TagName: {}", except_name),
+                        s,
+                        pos,
+                    ))
+                }
+            } else {
+                Err(LoadErr::unexpect("End Tag", t, pos))
+            }
+        }
+        _ => Err(LoadErr::unexpect("Tag", ty, pos)),
+    }
 }

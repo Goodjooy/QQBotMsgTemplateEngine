@@ -1,8 +1,9 @@
+use std::fmt::{write, Display};
 use std::str::Chars;
 
 use util::*;
 
-use self::tag::Tag;
+use self::tag::{Tag, TagAttr, TagStruct};
 
 use super::{PreviewIter, SignTableHandle};
 
@@ -28,7 +29,7 @@ pub struct LexicalHandle<'a> {
     data: PreviewableIter<'a>,
 }
 
-pub struct OutDataLoader<'a, S>(LexicalHandle<'a>, & 'a mut S, LexicalType)
+pub struct OutDataLoader<'a, S>(LexicalHandle<'a>, &'a mut S, LexicalType)
 where
     S: SignTableHandle;
 
@@ -58,7 +59,7 @@ impl<'a, S: SignTableHandle> PreviewIter for OutDataLoader<'a, S> {
 }
 
 impl<'a, S: SignTableHandle> OutDataLoader<'a, S> {
-    pub fn new(signs: & 'a mut S, iter: PreviewableIter<'a>) -> Self {
+    pub fn new(signs: &'a mut S, iter: PreviewableIter<'a>) -> Self {
         let mut t = OutDataLoader(LexicalHandle { data: iter }, signs, LexicalType::Nil);
         t.next();
         return t;
@@ -68,14 +69,25 @@ impl<'a, S: SignTableHandle> OutDataLoader<'a, S> {
         self.0.data.get_postion()
     }
 
-    pub fn get_sign_table(&mut self)->& mut S{
+    pub fn get_sign_table(&mut self) -> &mut S {
         self.1
     }
-    pub fn into_child(&mut self){
+    pub fn into_child(&mut self) {
         self.1.enter()
     }
-    pub fn leave_child(&mut self)->Option<()>{
+    pub fn leave_child(&mut self) -> Option<()> {
         self.1.leave();
         Some(())
     }
 }
+
+impl Display for LexicalType {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            LexicalType::Tag(tag) => write!(f, "Tag: {}", tag),
+            LexicalType::Literal(li) => write!(f, "Literal: {}", li.0),
+            LexicalType::Nil => write!(f, "Nil"),
+        }
+    }
+}
+

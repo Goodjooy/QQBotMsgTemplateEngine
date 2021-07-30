@@ -22,9 +22,17 @@ pub struct Sign {
 }
 
 pub struct If<'a>{
-    model: CmpMod,
-    body: Box<Items<'a>>,
+    pub model: CmpMod,
+    pub body: Box<Items<'a>>,
+    pub follows:IfFollows<'a>
 }
+
+pub enum IfFollows<'a> {
+    Nil,
+    Elif(Box<If<'a>>),
+    Else(Box<Items<'a>>)
+}
+
 
 pub struct Loop<'a> {
     pub times: Expression,
@@ -34,10 +42,10 @@ pub struct Loop<'a> {
 }
 
 pub struct For<'a> {
-    source: &'a Value,
-    name: Option<String>,
+    pub source: Value,
+    pub name: String,
 
-    body: Box<Items<'a>>,
+    pub body: Box<Items<'a>>,
 }
 
 pub struct While<'a> {

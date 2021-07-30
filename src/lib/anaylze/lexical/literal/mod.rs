@@ -3,7 +3,7 @@ use crate::lib::anaylze::LoadNext;
 use super::{check_next_sign, clear_space, PreviewableIter};
 #[derive(Debug,Clone,PartialEq, PartialOrd)]
 
-pub struct Literal(String);
+pub struct Literal(pub String);
 
 impl LoadNext<Literal> for Literal {
     fn load_next(data: &mut PreviewableIter) -> Option<Literal> {

@@ -50,7 +50,8 @@ pub fn nil_sign<'a, T, N>(err: LoadErr, nil: T) -> Result<LoadStatus<T, N>, Load
         LoadErr::IterEnd => Ok(LoadStatus::ok(nil)),
         LoadErr::UnexprectLetical(_)
         | LoadErr::UnSupportOperate(_)
-        | LoadErr::TargetAttrNotExist(_) => Err(err),
+        | LoadErr::TargetAttrNotExist(_)
+        | LoadErr::DataNotFoundInSignTable(_) => Err(err),
     }
 }
 
@@ -90,7 +91,6 @@ impl SignTableHandle for LexIter {
     fn new_sign(&mut self, _key: &str, _value: crate::lib::anaylze::Sign) -> Option<()> {
         None
     }
-
 }
 
 impl LexIter {

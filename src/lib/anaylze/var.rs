@@ -18,9 +18,16 @@ impl Sign {
             false
         }
     }
-    pub fn into_value(&mut self) -> Option<&mut Value> {
+    pub fn into_value_mut(&mut self) -> Option<&mut Value> {
         if let Self::Var(v) = self {
             Some(&mut v.value)
+        } else {
+            None
+        }
+    }
+    pub fn into_value(&self) -> Option<& Value> {
+        if let Self::Var(v) = self {
+            Some(& v.value)
         } else {
             None
         }

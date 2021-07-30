@@ -12,7 +12,7 @@ where
     I: PreviewIter<Item = L>,
     Self:Sized
 {
-    fn load_next(last: L, expr: &mut I) -> Result<LoadStatus<Self, L>, LoadErr>;
+    fn load_next(last:L,expr: &mut I) -> Result<LoadStatus<Self, L>, LoadErr>;
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -85,6 +85,7 @@ pub enum LoadErr {
     UnexprectLetical(String),
     UnSupportOperate(String),
     TargetAttrNotExist(String),
+    DataNotFoundInSignTable(String)
 }
 
 impl LoadErr {
@@ -104,9 +105,16 @@ impl LoadErr {
     }
     pub fn attr_not_found<'a>(attr_name:&str,tag_name:&str, pos: (usize, usize)) -> LoadErr {
         let (line, offset) = pos;
-        LoadErr::UnSupportOperate(format!(
+        LoadErr::TargetAttrNotExist(format!(
             "Attr:[name: {}] Can Not Be Found In Tag[name: {}] At line: {} Offset: {}",
             attr_name,tag_name, line, offset
+        ))
+    }
+    pub fn sign_not_in_table<'a>(sign_name:&str, pos: (usize, usize)) -> LoadErr {
+        let (line, offset) = pos;
+        LoadErr::DataNotFoundInSignTable(format!(
+            "Sign:[name: {}] Can Not Be Found In Sign Table At line: {} Offset: {}",
+            sign_name, line, offset
         ))
     }
 }

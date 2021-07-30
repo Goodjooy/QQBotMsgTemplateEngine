@@ -1,6 +1,7 @@
+use crate::lib::anaylze::Sign;
 use core::fmt::Display;
 
-use super::Value;
+use super::{Value, Var};
 
 impl Value {
     pub fn to_string(&self) -> String {
@@ -27,10 +28,24 @@ impl Value {
             .replace("}}", "}")
     }
 }
+impl Display for Sign {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Sign::Var(var) => write!(f, "Value: {}", &var),
+            Sign::Const(v) => write!(f, "Const: {}", &v),
+        }
+    }
+}
+
+impl Display for Var {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "name: {} | value: {}", self.name, self.value)
+    }
+}
 
 impl Display for Value {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f,"{}",self.to_string())
+        write!(f, "{}", self.to_string())
     }
 }
 
