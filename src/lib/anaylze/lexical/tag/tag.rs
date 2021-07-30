@@ -61,7 +61,7 @@ impl Display for Tag {
 
 impl Display for TagStruct {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "name: {}", self.get_name());
+        write!(f, "name: {}", self.get_name())?;
         let attrs = self
             .get_attrs()
             .iter()

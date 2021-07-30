@@ -49,20 +49,26 @@ impl Display for Value {
     }
 }
 
-#[test]
-fn test_format() {
-    let v = Value::Int(13);
-    let f = v.format("第{}{{}}个{}");
-
-    assert_eq!(f, "第13{}个13");
-}
-
-#[test]
-fn test_to_string() {
-    let v = Value::List(vec![
-        Value::Int(11),
-        Value::Int(21),
-        Value::List(vec![Value::Str("SSS".to_string())]),
-    ]);
-    assert_eq!(v.to_string(), "[11, 21, [SSS]]")
-}
+#[cfg(test)]
+mod test{
+    use super::*;
+    
+    #[test]
+    fn test_format() {
+        let v = Value::Int(13);
+        let f = v.format("第{}{{}}个{}");
+        
+        assert_eq!(f, "第13{}个13");
+    }
+    
+    #[test]
+    fn test_to_string() {
+        let v = Value::List(vec![
+            Value::Int(11),
+            Value::Int(21),
+            Value::List(vec![Value::Str("SSS".to_string())]),
+            ]);
+            assert_eq!(v.to_string(), "[11, 21, [SSS]]")
+        }
+        
+    }

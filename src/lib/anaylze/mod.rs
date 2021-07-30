@@ -8,6 +8,7 @@ mod syntax;
 mod val_cmp;
 mod val_format;
 mod var;
+mod into_mid;
 
 
 pub struct Anaylze<'a, S>

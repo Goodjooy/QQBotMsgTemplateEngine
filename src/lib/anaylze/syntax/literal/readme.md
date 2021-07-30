@@ -19,6 +19,7 @@ tag -> ctrl_tag
 ctrl_tag->if
        | loops
         | var 
+        | need
 
 info_tag-> img | at
 
@@ -43,3 +44,6 @@ litral_tag ->
 
 img-> <img url="" file=""/>
 At -> <at uid="" sep=""/>
+
+// 需要使用到的变量
+need -> <need name="valuename" />
