@@ -190,5 +190,10 @@ mod test {
             table.get_sign("test1"),
             Some(&Sign::Var(Var::new("test1", Value::Int(11+11))))
         );
+
+
+        table.enter();
+
+        
     }
 }

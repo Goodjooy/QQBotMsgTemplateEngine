@@ -37,40 +37,84 @@ impl Value {
 }
 
 impl Value {
-
-    fn add_assi(&mut self, rhs: &Self) -> Option<()> {
-        if let Self::Int(i) = self {
-            if let Self::Int(ir) = rhs {
-                todo!()
+    pub fn set_as(&mut self, target: Self) -> Option<()> {
+        match self {
+            Value::UnSet => *self = target,
+            Value::Int(_) => {
+                if let Value::Int(is) = target {
+                    *self = Value::Int(is)
+                } else {
+                    return None;
+                }
+            }
+            Value::Str(_) => {
+                if let Value::Str(is) = target {
+                    *self = Value::Str(is)
+                } else {
+                    return None;
+                }
+            }
+            Value::List(_) => {
+                if let Value::List(is) = target {
+                    *self = Value::List(is)
+                } else {
+                    return None;
+                }
             }
         }
-        return None;
+
+        Some(())
     }
 
-    fn sub_assi(&mut self, rhs: &Self) -> Option<()> {
+    pub fn add_assgin(&mut self, rhs: i64) -> Option<()> {
         if let Self::Int(i) = self {
-            if let Self::Int(ir) = rhs {
-                todo!()
-            }
+            *i += rhs;
+            Some(())
+        } else {
+            None
         }
-        return None;
     }
 
-    fn mul_assi(&mut self, rhs: &Self) -> Option<()> {
+    pub fn sub_assgin(&mut self, rhs: i64) -> Option<()> {
         if let Self::Int(i) = self {
-            if let Self::Int(ir) = rhs {
-                todo!()
-            }
+            *i -= rhs;
+            Some(())
+        } else {
+            None
         }
-        return None;
     }
 
-    fn div_assi(&mut self, rhs: &Self) -> Option<()> {
+    pub fn mul_assgin(&mut self, rhs: i64) -> Option<()> {
         if let Self::Int(i) = self {
-            if let Self::Int(ir) = rhs {
-                todo!()
-            }
+            *i *= rhs;
+            Some(())
+        } else {
+            None
         }
-        return None;
+    }
+
+    pub fn div_assign(&mut self, rhs: i64) -> Option<()> {
+        if let Self::Int(i) = self {
+            *i /= rhs;
+            Some(())
+        } else {
+            None
+        }
+    }
+
+    pub fn push(&mut self, data: Value) -> Option<()> {
+        if let Self::List(l) = self {
+            l.push(data);
+            Some(())
+        } else if let Self::Str(s) = self {
+            if let Value::Str(sd) = data {
+                s.push_str(&sd);
+                Some(())
+            } else {
+                None
+            }
+        } else {
+            None
+        }
     }
 }
