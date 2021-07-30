@@ -17,6 +17,7 @@ where
             ExprLexical::Digit(num) => Ok(LoadStatus::ok(Factor::Digit(num))),
             ExprLexical::Value(var) => match var {
                 crate::lib::anaylze::Sign::Var(v) => Ok(LoadStatus::ok(Factor::Var(ExprVar(v)))),
+                crate::lib::anaylze::Sign::Const(_) => todo!(),
             },
             ExprLexical::GroupSign(ch) => {
                 if ch == '(' {

@@ -91,13 +91,6 @@ impl SignTableHandle for LexIter {
         None
     }
 
-    fn leave(&mut self) {
-        todo!()
-    }
-
-    fn enter(&mut self) {
-        todo!()
-    }
 }
 
 impl LexIter {

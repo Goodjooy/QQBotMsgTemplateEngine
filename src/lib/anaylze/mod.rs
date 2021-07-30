@@ -7,6 +7,8 @@ mod sign_table;
 mod syntax;
 mod val_cmp;
 mod val_format;
+mod var;
+
 
 pub struct Anaylze<'a, S>
 where
@@ -18,6 +20,7 @@ where
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Sign {
     Var(Var),
+    Const(Value),
 }
 #[derive(Debug,Clone,PartialEq, PartialOrd)]
 pub enum Value {
@@ -38,8 +41,8 @@ pub trait SignTableHandle:Sized {
     fn get_mut_sign(&mut self, key: &str) -> Option<&mut Sign>;
     fn new_sign(&mut self, key: &str, value: Sign) -> Option<()>;
 
-    fn leave(&mut self);
-    fn enter(&mut self);
+    fn leave(&mut self){}
+    fn enter(&mut self){}
 }
 
 pub trait LoadNext<T> {

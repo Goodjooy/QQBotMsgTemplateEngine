@@ -115,6 +115,7 @@ impl Display for ExprLexical {
             ExprLexical::Digit(num) => write!(f, "< const, {} >", num),
             ExprLexical::Value(var) => match var {
                 Sign::Var(v) => write!(f, "< '{}', {} >", v.name, v.value.to_string()),
+                Sign::Const(_) => todo!(),
             },
         }
     }
