@@ -2,6 +2,7 @@ use crate::anaylze::lexical::LexicalType;
 use crate::anaylze::lexical::OutDataLoader;
 use crate::anaylze::syntax::literal::structs::CmpMod;
 use crate::anaylze::syntax::literal::structs::While;
+use crate::anaylze::syntax::literal::util::check_end_tag;
 use crate::anaylze::syntax::literal::util::check_tag_name;
 use crate::anaylze::syntax::literal::Item;
 use crate::anaylze::syntax::literal::ItemMeta;
@@ -33,6 +34,10 @@ where
 
             //TODO: ItemsLoader
             let body: Items = Items(ItemMeta::Literal(Literal("test".to_string())), Item::Nil);
+
+
+            let end_tag=expr.next().ok_or(LoadErr::IterEnd)?;
+            check_end_tag(&end_tag, "while", expr.get_postion())?;
 
             Ok(LoadStatus::ok(While {
                 model: cmp,
