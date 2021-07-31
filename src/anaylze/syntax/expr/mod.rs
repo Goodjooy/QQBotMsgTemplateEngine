@@ -42,6 +42,7 @@ pub struct Caculate(pub Item, pub SubCaculate);
 pub enum Expression {
     Caculate(Caculate),
     Literal(Literal),
+    Bool(bool)
 }
 
 pub fn nil_sign<'a, T, N>(err: LoadErr, nil: T) -> Result<LoadStatus<T, N>, LoadErr> {

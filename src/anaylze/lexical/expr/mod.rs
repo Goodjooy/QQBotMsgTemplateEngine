@@ -5,6 +5,7 @@ use std::fmt::Display;
 pub enum ExprLexical {
     Nil,
     Literal(String),
+    Bool(bool),
     CaculateSign(char),
     GroupSign(char),
     Digit(i64),
@@ -40,8 +41,14 @@ impl<'a> LoadNextWithSignTable<'a, ExprLexical> for ExprLexical {
             }
         } else {
             let name = Self::read_sign_name(data)?;
-            let value = sign_table.get_sign(&name)?.clone();
-            Some(Self::Value(value))
+            if name=="true" || name=="false"{
+                let v=if name=="true"{true}else{false};
+                Some(Self::Bool(v))
+            }else{
+
+                let value = sign_table.get_sign(&name)?.clone();
+                Some(Self::Value(value))
+            }
         }
     }
 }
@@ -117,6 +124,7 @@ impl Display for ExprLexical {
                 Sign::Var(v) => write!(f, "< '{}', {} >", v.name, v.value.to_string()),
                 Sign::Const(_) => todo!(),
             },
+            ExprLexical::Bool(b) => write!(f,"<bool, {}>",b),
         }
     }
 }

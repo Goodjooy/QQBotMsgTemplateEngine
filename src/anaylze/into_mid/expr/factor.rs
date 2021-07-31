@@ -1,7 +1,8 @@
-use crate::anaylze::into_mid::expr::OpQuate;
-use crate::anaylze::syntax::expr::Factor;
-use crate::mid_output::IntoMid;
-use crate::mid_output::{MidData, TempValue};
+use crate::anaylze::{
+        into_mid::expr::OpQuate,
+        syntax::expr::Factor,
+        Value::{Bool, List, Str},
+    };
 
 use super::IntoOpQuate;
 
@@ -20,7 +21,7 @@ impl IntoOpQuate for Factor {
                     crate::anaylze::Value::Int(i) => {
                         vec![OpQuate::F(i)]
                     }
-                    crate::anaylze::Value::Str(_) | crate::anaylze::Value::List(_) => vec![],
+                    Bool(_) | Str(_) | List(_) => vec![],
                 };
                 res
             }
@@ -29,10 +30,10 @@ impl IntoOpQuate for Factor {
 }
 #[cfg(test)]
 mod test {
-    use crate::anaylze::Value;
-use crate::anaylze::Var;
-use crate::anaylze::syntax::expr::{Caculate, ExprVar, Item, SubItem};
+    use crate::anaylze::syntax::expr::{Caculate, ExprVar, Item, SubItem};
     use crate::anaylze::syntax::expr::{Expression, SubCaculate};
+    use crate::anaylze::Value;
+    use crate::anaylze::Var;
 
     use super::*;
 

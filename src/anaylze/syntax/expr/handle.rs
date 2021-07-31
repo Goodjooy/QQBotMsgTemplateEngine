@@ -25,6 +25,9 @@ where
                 Caculate::load_next(last, expr)
                     .and_then(|f| Ok(f.and_then(|f| Expression::Caculate(f))))
             }
+            ExprLexical::Bool(b)=>{
+                Ok(LoadStatus::ok(Self::Bool(b)))
+            }
             _ => Ok(LoadStatus::unmatch(last)),
         };
 

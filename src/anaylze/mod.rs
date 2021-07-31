@@ -27,6 +27,7 @@ pub enum Sign {
 pub enum Value {
     UnSet(String),
     Int(i64),
+    Bool(bool),
     Str(String),
     List(Vec<Value>),
 }

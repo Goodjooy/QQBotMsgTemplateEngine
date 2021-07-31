@@ -15,6 +15,7 @@ impl Value {
                 .and_then(|s| Some(format!("[{}]", s)))
                 .unwrap_or("%%Failure To String%%".to_string()),
             Value::UnSet(s) => String::from("Rander Time Set"),
+            Value::Bool(b) => b.to_string(),
         }
     }
     pub fn format(&self, format: &str) -> String {

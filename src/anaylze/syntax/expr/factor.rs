@@ -5,6 +5,7 @@ use crate::anaylze::{
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
     SignTableHandle,
+    Value::{Bool, Int, List, Str, UnSet},
 };
 
 use super::Factor;
@@ -63,12 +64,8 @@ impl<'a> Factor {
                 let ExprVar(sign) = v;
                 let value = &sign.value;
                 match value {
-                    crate::anaylze::Value::UnSet(_) | crate::anaylze::Value::Int(_) => {
-                        Ok(LoadStatus::ok(Factor::Var(ExprVar(sign))))
-                    }
-                    crate::anaylze::Value::Str(_) | crate::anaylze::Value::List(_) => {
-                        Err(LoadErr::unsupport(&sign, op, pos))
-                    }
+                    UnSet(_) | Int(_) => Ok(LoadStatus::ok(Factor::Var(ExprVar(sign)))),
+                    Str(_) | List(_) | Bool(_) => Err(LoadErr::unsupport(&sign, op, pos)),
                 }
             }
         }

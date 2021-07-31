@@ -4,6 +4,7 @@ use self::structs::{At, For, If, Image, Loop, Sign, Text, While};
 
 //tag分析符号
 mod structs;
+mod cmp;
 
 mod loops;
 mod util;

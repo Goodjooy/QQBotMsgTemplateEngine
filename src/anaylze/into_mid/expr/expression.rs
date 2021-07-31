@@ -1,6 +1,6 @@
 use crate::anaylze::syntax::expr::Expression;
 use crate::anaylze::syntax::expr::Factor::{Digit, SubExpr, Var};
-use crate::anaylze::Value::{Int, List, Str, UnSet};
+use crate::anaylze::Value::{Bool, Int, List, Str, UnSet};
 use crate::mid_output::{IntoMid, MidData, SignIdGenerator, TempValue};
 
 use super::IntoOpQuate;
@@ -9,7 +9,7 @@ impl IntoOpQuate for Expression {
     fn into_op(&self) -> Vec<super::OpQuate> {
         match self {
             Expression::Caculate(c) => c.into_op(),
-            Expression::Literal(_) => vec![],
+            Expression::Literal(_) | Expression::Bool(_) => vec![],
         }
     }
 }
@@ -50,6 +50,12 @@ impl IntoMid for Expression {
                                         l.clone().into_iter().map(|f| f.into_temp()).collect(),
                                     ),
                                 )],
+                                Bool(b) => {
+                                    vec![MidData::SetTemp(
+                                        id_generator.next_id(),
+                                        TempValue::Bool(*b),
+                                    )]
+                                }
                             }
                         }
                     }
@@ -58,6 +64,9 @@ impl IntoMid for Expression {
                     id_generator.next_id(),
                     TempValue::Str(l.0.clone()),
                 )],
+                Expression::Bool(b) => {
+                    vec![MidData::SetTemp(id_generator.next_id(), TempValue::Bool(*b))]
+                }
             }
         }
     }

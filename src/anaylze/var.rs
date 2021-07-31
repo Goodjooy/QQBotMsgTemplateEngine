@@ -50,6 +50,7 @@ impl Value {
             Value::Int(i) => TempValue::Int(i),
             Value::Str(s) => TempValue::Str(s),
             Value::List(l) => TempValue::List(l.into_iter().map(|f| f.into_temp()).collect()),
+            Value::Bool(b) => TempValue::Bool(b),
         }
     }
 }
@@ -79,6 +80,13 @@ impl Value {
                     return None;
                 }
             }
+            Value::Bool(_) => {
+                if let Value::Bool(b)=target{
+                    *self=Value::Bool(b)
+                }else {
+                    return None;
+                }
+            },
         }
 
         Some(())
