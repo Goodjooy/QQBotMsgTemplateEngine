@@ -26,7 +26,7 @@ pub struct If<'a> {
 
 pub enum IfFollows<'a> {
     Nil,
-    Elif(Box<If<'a>>),
+    Elif(Box<If<'a>>,Box<IfFollows<'a>>),
     Else(Box<Items<'a>>),
 }
 
@@ -64,9 +64,13 @@ pub enum CmpMod {
     BoolF(Expression),
 }
 
+pub struct Need{
+    pub name:String
+}
+
 pub struct Var {
-    name: String,
-    op: ValueOperate,
+    pub name: String,
+    pub op: ValueOperate,
 }
 
 pub enum ValueOperate {

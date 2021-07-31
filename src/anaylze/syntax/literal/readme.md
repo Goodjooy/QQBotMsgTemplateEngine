@@ -25,7 +25,7 @@ info_tag-> img | at
 
 if -> <if mod="".... > items </if> elif
 
-elif -> <elif mod='' ...>items </elif>
+elif -> <elif mod='' ...>items </elif> elif
         | Nil
 else -> <else>items </else>
         |Nil
