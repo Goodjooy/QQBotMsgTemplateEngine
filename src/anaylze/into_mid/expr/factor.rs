@@ -1,24 +1,29 @@
-use crate::mid_output::{MidData, TempValue};
+use crate::anaylze::into_mid::expr::OpQuate;
 use crate::anaylze::syntax::expr::Factor;
 use crate::mid_output::IntoMid;
+use crate::mid_output::{MidData, TempValue};
 
+use super::IntoOpQuate;
 
-impl IntoMid for Factor {
-    fn into_mid(self,id_generator:&mut crate::mid_output::SignIdGenerator)->Vec<MidData> {
-        let mut res=Vec::new();
+impl IntoOpQuate for Factor {
+    fn into_op(&self) -> Vec<super::OpQuate> {
         match self {
-            Factor::Digit(d) =>{
-                let name=id_generator.next_id();
-                res.push(MidData::SetTemp(name,TempValue::Int(d)))
-            },
-            Factor::SubExpr(e) => todo!(),
-            Factor::Var(s) => {
-                let sign=s.0;
-                let var=sign.value;
-                res.push(MidData::SetTemp(id_generator.next_id(),var.into_temp()))
-            },
-        };
-
-        res
+            Factor::Digit(d) => vec![OpQuate::F(*d)],
+            Factor::SubExpr(e) => e.into_op(),
+            Factor::Var(v) => {
+                let v = &v.0;
+                let name = &v.name;
+                let res = match v.value {
+                    crate::anaylze::Value::UnSet(_) => {
+                        vec![OpQuate::Sign(name.clone())]
+                    }
+                    crate::anaylze::Value::Int(i) => {
+                        vec![OpQuate::F(i)]
+                    }
+                    crate::anaylze::Value::Str(_) | crate::anaylze::Value::List(_) => vec![],
+                };
+                res
+            }
+        }
     }
 }

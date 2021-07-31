@@ -28,7 +28,7 @@ pub enum SubItem {
     Nil,
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Item(Factor, SubItem);
+pub struct Item(pub Factor,pub  SubItem);
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum SubCaculate {
@@ -37,7 +37,7 @@ pub enum SubCaculate {
     Nil,
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
-pub struct Caculate(Item, SubCaculate);
+pub struct Caculate(pub Item, pub SubCaculate);
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum Expression {
     Caculate(Caculate),

@@ -47,7 +47,7 @@ pub enum TempValue {
 type MoveOffset = isize;
 
 pub trait IntoMid {
-    fn into_mid(self, id_generator: &mut SignIdGenerator) -> Vec<MidData>;
+    fn into_mid(&self, id_generator: &mut SignIdGenerator) -> Vec<MidData>;
 }
 
 pub struct SignIdGenerator(usize);
