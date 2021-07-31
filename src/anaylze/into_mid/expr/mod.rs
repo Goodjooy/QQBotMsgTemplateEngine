@@ -5,6 +5,8 @@ mod factor;
 mod item;
 mod expression;
 mod caculate;
+
+#[derive(Debug,PartialEq,Clone,PartialOrd)]
 pub enum OpQuate {
     F(i64),
     Sign(String),

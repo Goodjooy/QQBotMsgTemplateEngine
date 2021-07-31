@@ -27,3 +27,65 @@ impl IntoOpQuate for Factor {
         }
     }
 }
+#[cfg(test)]
+mod test {
+    use crate::anaylze::Value;
+use crate::anaylze::Var;
+use crate::anaylze::syntax::expr::{Caculate, ExprVar, Item, SubItem};
+    use crate::anaylze::syntax::expr::{Expression, SubCaculate};
+
+    use super::*;
+
+    #[test]
+    fn test_digit_into_quate() {
+        let v = Factor::Digit(11);
+
+        let res = v.into_op();
+
+        assert_eq!(res, vec![OpQuate::F(11)])
+    }
+
+    #[test]
+    fn test_sub_expr_into() {
+        // 11/2*5+9-(-9)
+        let v = Factor::SubExpr(Box::new(Expression::Caculate(Caculate(
+            Item(
+                Factor::Digit(11),
+                SubItem::Division(
+                    Factor::Digit(2),
+                    Box::new(SubItem::Multiple(Factor::Digit(5), Box::new(SubItem::Nil))),
+                ),
+            ),
+            SubCaculate::Addition(
+                Item(Factor::Digit(9), SubItem::Nil),
+                Box::new(SubCaculate::Subtraction(
+                    Item(
+                        Factor::Var(ExprVar(Var {
+                            name: String::from("test1"),
+                            value: Value::UnSet(String::from("test1")),
+                        })),
+                        SubItem::Nil,
+                    ),
+                    Box::new(SubCaculate::Nil),
+                )),
+            ),
+        ))));
+
+        let res = v.into_op();
+
+        assert_eq!(
+            res,
+            vec![
+                OpQuate::F(11),
+                OpQuate::F(2),
+                OpQuate::Div,
+                OpQuate::F(5),
+                OpQuate::Mul,
+                OpQuate::F(9),
+                OpQuate::Add,
+                OpQuate::Sign(String::from("test1")),
+                OpQuate::Sub
+            ]
+        )
+    }
+}
