@@ -45,9 +45,9 @@ pub struct For<'a> {
 }
 
 pub struct While<'a> {
-    model: CmpMod,
+    pub model: CmpMod,
 
-    body: Box<Items<'a>>,
+    pub body: Box<Items<'a>>,
 }
 
 pub enum CmpMod {
