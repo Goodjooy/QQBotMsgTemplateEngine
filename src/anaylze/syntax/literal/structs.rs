@@ -2,7 +2,6 @@ use crate::anaylze::{syntax::expr::Expression, Value};
 
 use super::{Item, Items};
 
-pub struct Text<'a>(Box<Item<'a>>);
 
 pub struct At<'a> {
     uid: u64,
@@ -74,10 +73,15 @@ pub struct Var {
 }
 
 pub enum ValueOperate {
-    OutSet,
+    // create new value on sign tabel 
+    //but with value Unset
     New,
+    // assign a value in sign tabel
+    // if not exist create it 
     Assign(Expression),
-    NewDefault(Expression),
+    // format the value into text
     Print(String),
+    // format the value into text with 
+    // \n at the end
     Println(String),
 }

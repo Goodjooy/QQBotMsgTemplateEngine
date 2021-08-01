@@ -1,19 +1,15 @@
-use crate::anaylze::lexical::LexicalType;
-use crate::anaylze::lexical::OutDataLoader;
-use crate::anaylze::syntax::literal::structs::CmpMod;
-use crate::anaylze::syntax::literal::structs::If;
-use crate::anaylze::syntax::literal::structs::IfFollows;
-use crate::anaylze::syntax::literal::util::check_end_tag;
-use crate::anaylze::syntax::literal::util::check_tag_name;
-use crate::anaylze::syntax::literal::Item;
-use crate::anaylze::syntax::literal::ItemMeta;
-use crate::anaylze::syntax::literal::Items;
-use crate::anaylze::syntax::literal::Literal;
-use crate::anaylze::syntax::LoadErr;
-use crate::anaylze::syntax::LoadStatus;
-use crate::anaylze::syntax::SyntaxLoadNext;
-use crate::anaylze::PreviewIter;
-use crate::anaylze::SignTableHandle;
+use crate::anaylze::{
+    lexical::{LexicalType, OutDataLoader},
+    syntax::{
+        literal::{
+            structs::{CmpMod, If, IfFollows},
+            util::{check_end_tag, check_tag_name},
+            Item, ItemMeta, Items, Literal,
+        },
+        LoadErr, LoadStatus, SyntaxLoadNext,
+    },
+    PreviewIter, SignTableHandle,
+};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for IfFollows<'a>
 where

@@ -1,6 +1,6 @@
 use crate::anaylze::{SignTableHandle, Var, lexical::expr::ExprIter, syntax::SyntaxLoadNext};
 
-use self::structs::{At, For, If, Image, Loop, Sign, Text, While};
+use self::structs::{At, For, If, Image, Loop, Sign, While};
 
 //tag分析符号
 mod structs;
@@ -8,6 +8,8 @@ mod cmp;
 
 mod loops;
 mod if_statement;
+mod var;
+
 mod util;
 
 pub struct Items<'a>(ItemMeta<'a>,Item<'a>);
