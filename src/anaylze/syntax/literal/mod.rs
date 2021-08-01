@@ -1,6 +1,6 @@
 use crate::anaylze::{SignTableHandle, Var, lexical::expr::ExprIter, syntax::SyntaxLoadNext};
 
-use self::structs::{At, For, If, Image, Loop, Sign, While};
+use self::structs::{At, For, If, Image, Loop,  Sign, While};
 
 //tag分析符号
 mod structs;
@@ -9,48 +9,50 @@ mod cmp;
 mod loops;
 mod if_statement;
 mod var;
+mod info_tag;
 
 mod util;
 
-pub struct Items<'a>(ItemMeta<'a>,Item<'a>);
+pub struct Items(ItemMeta,Item);
 
 /// * 语法分析单元
 /// * 
-pub enum   Item<'a> {
-    Item(ItemMeta<'a>, Box<Item<'a>>),
+pub enum   Item {
+    Item(ItemMeta, Box<Item>),
     Nil
 }
 
-pub enum ItemMeta<'a> {
+pub enum ItemMeta {
     Literal(Literal),
-    Tag(Tag<'a>),
+    Tag(Tag),
 }
 // 字面量分析单元，对应任何不在标签内部的文本
 pub struct Literal (String);
 
 // tag分析单元，分析全部tag类型
-pub enum Tag<'a> {
-    Ctrl(CtrlTag<'a>),
-    Info(InfoTag<'a>),
+pub enum Tag {
+    Ctrl(CtrlTag),
+    Info(InfoTag),
     Liter(LiteralTag)
     
 }
 // 控制tag 控制流tag
-pub enum CtrlTag<'a> {
-    If(If<'a>),
-    Loops(Loops<'a>),
+pub enum CtrlTag {
+    If(If),
+    Loops(Loops),
     Var(Var),
 }
 // 循环
-pub enum Loops<'a> {
-    For(For<'a>),
-    Loop(Loop<'a>),
-    While(While<'a>),
+pub enum Loops {
+    For(For),
+    Loop(Loop),
+    While(While),
 }
 // 消息显示tag
-pub enum InfoTag<'a> {
+pub enum InfoTag {
     Img(Image),
-    At(At<'a>),
+    At(At),
+    
 
 }
 

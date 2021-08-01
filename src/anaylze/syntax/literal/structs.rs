@@ -1,15 +1,16 @@
 use crate::anaylze::{syntax::expr::Expression, Value};
 
-use super::{Item, Items};
+use super::Items;
 
 
-pub struct At<'a> {
-    uid: u64,
-    sep: &'a str,
+pub struct At {
+    pub uid: u64,
+    pub sep: String,
 }
 pub enum Image {
-    URL(String),
+    Url(String),
     File(String),
+    Base64(String),
 }
 
 pub struct Sign {
@@ -17,36 +18,36 @@ pub struct Sign {
     pub repeat: u32,
 }
 
-pub struct If<'a> {
+pub struct If {
     pub model: CmpMod,
-    pub body: Box<Items<'a>>,
-    pub follows: IfFollows<'a>,
+    pub body: Box<Items>,
+    pub follows: IfFollows,
 }
 
-pub enum IfFollows<'a> {
+pub enum IfFollows {
     Nil,
-    Elif(Box<If<'a>>),
-    Else(Box<Items<'a>>),
+    Elif(Box<If>),
+    Else(Box<Items>),
 }
 
-pub struct Loop<'a> {
+pub struct Loop {
     pub times: Expression,
     pub name: Option<String>,
 
-    pub body: Box<Items<'a>>,
+    pub body: Box<Items>,
 }
 
-pub struct For<'a> {
+pub struct For {
     pub source: Value,
     pub name: String,
 
-    pub body: Box<Items<'a>>,
+    pub body: Box<Items>,
 }
 
-pub struct While<'a> {
+pub struct While {
     pub model: CmpMod,
 
-    pub body: Box<Items<'a>>,
+    pub body: Box<Items>,
 }
 
 pub enum CmpMod {
@@ -63,9 +64,6 @@ pub enum CmpMod {
     BoolF(Expression),
 }
 
-pub struct Need{
-    pub name:String
-}
 
 pub struct Var {
     pub name: String,
@@ -73,6 +71,9 @@ pub struct Var {
 }
 
 pub enum ValueOperate {
+    // need user prvide this value
+    // into render
+    Need,
     // create new value on sign tabel 
     //but with value Unset
     New,

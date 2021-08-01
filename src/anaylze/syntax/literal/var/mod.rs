@@ -21,6 +21,7 @@ impl ValueOperate {
         };
         match op_mod.as_str() {
             "new" => Ok(ValueOperate::New),
+            "need"=>Ok(ValueOperate::Need),
             "assign" => {
                 let ex = load_express(tag, "value", expr.get_postion(), expr.get_sign_table())?;
                 Ok(ValueOperate::Assign(ex))

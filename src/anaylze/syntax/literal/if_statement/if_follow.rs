@@ -11,7 +11,7 @@ use crate::anaylze::{
     PreviewIter, SignTableHandle,
 };
 
-impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for IfFollows<'a>
+impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for IfFollows
 where
     S: SignTableHandle,
 {

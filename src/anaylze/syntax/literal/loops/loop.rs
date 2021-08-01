@@ -10,7 +10,7 @@ use crate::anaylze::{
     Sign, SignTableHandle, Value, Var,
 };
 
-impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop<'a>
+impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop
 where
     S: SignTableHandle,
 {
