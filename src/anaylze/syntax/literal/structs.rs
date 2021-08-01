@@ -26,7 +26,7 @@ pub struct If<'a> {
 
 pub enum IfFollows<'a> {
     Nil,
-    Elif(Box<If<'a>>,Box<IfFollows<'a>>),
+    Elif(Box<If<'a>>),
     Else(Box<Items<'a>>),
 }
 
