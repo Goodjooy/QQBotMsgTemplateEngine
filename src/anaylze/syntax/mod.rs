@@ -10,9 +10,9 @@ pub mod literal;
 pub trait SyntaxLoadNext<'a, I, L>
 where
     I: PreviewIter<Item = L>,
-    Self:Sized
+    Self: Sized,
 {
-    fn load_next(last:L,expr: &mut I) -> Result<LoadStatus<Self, L>, LoadErr>;
+    fn load_next(last: L, expr: &mut I) -> Result<LoadStatus<Self, L>, LoadErr>;
 }
 
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
@@ -22,6 +22,13 @@ pub enum LoadStatus<T, N> {
 }
 
 impl<T, N> LoadStatus<T, N> {
+    pub fn is_ok(&self) -> bool {
+        match self {
+            LoadStatus::Success(_) => true,
+            LoadStatus::NotMatch(_) => false,
+        }
+    }
+
     pub fn ok(data: T) -> Self {
         LoadStatus::Success(data)
     }
@@ -78,6 +85,15 @@ impl<T, N> LoadStatus<T, N> {
             LoadStatus::NotMatch(e) => panic!("Failure to Unwrap=> {:?}", &e),
         }
     }
+    pub fn unwarp_unmatch(self) -> N
+    where
+        T: Debug,
+    {
+        match self {
+            LoadStatus::Success(d) => panic!("Failure to Unwrap=> {:?}", &d),
+            LoadStatus::NotMatch(data) => data,
+        }
+    }
 }
 #[derive(Debug, Clone, PartialEq, PartialOrd)]
 pub enum LoadErr {
@@ -85,7 +101,7 @@ pub enum LoadErr {
     UnexprectLetical(String),
     UnSupportOperate(String),
     TargetAttrNotExist(String),
-    DataNotFoundInSignTable(String)
+    DataNotFoundInSignTable(String),
 }
 
 impl LoadErr {
@@ -103,14 +119,14 @@ impl LoadErr {
             var.name, var.value, operate, line, offset
         ))
     }
-    pub fn attr_not_found<'a>(attr_name:&str,tag_name:&str, pos: (usize, usize)) -> LoadErr {
+    pub fn attr_not_found<'a>(attr_name: &str, tag_name: &str, pos: (usize, usize)) -> LoadErr {
         let (line, offset) = pos;
         LoadErr::TargetAttrNotExist(format!(
             "Attr:[name: {}] Can Not Be Found In Tag[name: {}] At line: {} Offset: {}",
-            attr_name,tag_name, line, offset
+            attr_name, tag_name, line, offset
         ))
     }
-    pub fn sign_not_in_table<'a>(sign_name:&str, pos: (usize, usize)) -> LoadErr {
+    pub fn sign_not_in_table<'a>(sign_name: &str, pos: (usize, usize)) -> LoadErr {
         let (line, offset) = pos;
         LoadErr::DataNotFoundInSignTable(format!(
             "Sign:[name: {}] Can Not Be Found In Sign Table At line: {} Offset: {}",
