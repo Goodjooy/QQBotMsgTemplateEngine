@@ -1,9 +1,9 @@
-use std::fmt::{write, Display};
+use std::fmt::{Display};
 use std::str::Chars;
 
 use util::*;
 
-use self::tag::{Tag, TagAttr, TagStruct};
+use self::tag::{Tag};
 
 use super::{PreviewIter, SignTableHandle};
 

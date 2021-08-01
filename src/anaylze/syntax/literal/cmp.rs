@@ -1,4 +1,4 @@
-use crate::anaylze::{SignTableHandle, lexical::tag::{TagAttr, TagStruct}, syntax::LoadErr};
+use crate::anaylze::{SignTableHandle, lexical::tag::{TagStruct}, syntax::LoadErr};
 use super::{structs::CmpMod, util::load_express};
 
 impl CmpMod {
