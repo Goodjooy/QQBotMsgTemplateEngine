@@ -1,6 +1,6 @@
-use crate::anaylze::{lexical::expr::ExprIter, Var};
+use crate::anaylze::{lexical::expr::ExprIter};
 
-use self::structs::{At, For, If, Image, Loop, Sign, While};
+use self::structs::{At, For, If, Image, Loop, Sign, Var, While};
 
 //tag分析符号
 mod cmp;
