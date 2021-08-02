@@ -1,4 +1,4 @@
-use std::fmt::{Debug, Display};
+use std::{error::Error, fmt::{Debug, Display}};
 
 use crate::anaylze::lexical::expr::ExprLexical;
 
@@ -54,12 +54,14 @@ impl<T, N> LoadStatus<T, N> {
             LoadStatus::NotMatch(expr) => Err(f(expr)),
         }
     }
-    pub fn unmatch_do<F>(self, f: F)
+    pub fn unmatch_then<F, R>(self, f: F) -> Option<LoadStatus<R, N>>
     where
-        F: Fn(N),
+        F: FnOnce(N) -> LoadStatus<R,N>,
     {
         if let Self::NotMatch(n) = self {
-            f(n)
+            Some(f(n))
+        } else {
+           None
         }
     }
     pub fn and_then<R, F>(self, f: F) -> LoadStatus<R, N>
