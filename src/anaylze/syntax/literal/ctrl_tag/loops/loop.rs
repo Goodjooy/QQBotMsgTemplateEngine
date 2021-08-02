@@ -1,4 +1,14 @@
-use crate::anaylze::{Sign, SignTableHandle, Value, Var, lexical::{LexicalType, OutDataLoader}, syntax::{LoadErr, LoadStatus, SyntaxLoadNext, literal::{Item, ItemMeta, Items, Literal, Loop, TagInfo, util::{check_end_tag, check_tag_match, check_tag_name, load_express}}}};
+use crate::anaylze::{
+    lexical::{LexicalType, OutDataLoader},
+    syntax::{
+        literal::{
+            util::{check_end_tag, check_tag_match, load_express},
+            Item, ItemMeta, Items, Literal, Loop, TagInfo,
+        },
+        LoadErr, LoadStatus, SyntaxLoadNext,
+    },
+    Sign, SignTableHandle, Value, Var,
+};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop
 where
@@ -43,7 +53,7 @@ where
 }
 
 impl TagInfo for Loop {
-    fn tag_name()->& 'static str {
+    fn tag_name() -> &'static str {
         "loop"
     }
 }

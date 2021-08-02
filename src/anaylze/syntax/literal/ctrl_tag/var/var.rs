@@ -1,12 +1,15 @@
-use crate::anaylze::lexical::LexicalType;
-use crate::anaylze::lexical::OutDataLoader;
-use crate::anaylze::syntax::literal::structs::ValueOperate;
-use crate::anaylze::syntax::literal::structs::Var;
-use crate::anaylze::syntax::literal::util::check_tag_name;
-use crate::anaylze::syntax::LoadErr;
-use crate::anaylze::syntax::LoadStatus;
-use crate::anaylze::syntax::SyntaxLoadNext;
-use crate::anaylze::SignTableHandle;
+use crate::anaylze::{
+    lexical::{LexicalType, OutDataLoader},
+    syntax::{
+        literal::{
+            structs::{ValueOperate, Var},
+            util::check_tag_match,
+            TagInfo,
+        },
+        LoadErr, LoadStatus, SyntaxLoadNext,
+    },
+    SignTableHandle,
+};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Var
 where
@@ -16,7 +19,7 @@ where
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
     ) -> Result<LoadStatus<Self, LexicalType>, LoadErr> {
-        if let Some(tag) = check_tag_name(&last, "var", true) {
+        if let Some(tag) = check_tag_match::<Self>(&last) {
             let name = {
                 let na = tag.get("name").ok_or(LoadErr::attr_not_found(
                     "name",
@@ -31,5 +34,15 @@ where
         } else {
             Ok(LoadStatus::unmatch(last))
         }
+    }
+}
+
+impl TagInfo for Var {
+    fn tag_name() -> &'static str {
+        "var"
+    }
+
+    fn accept_full() -> bool {
+        true
     }
 }

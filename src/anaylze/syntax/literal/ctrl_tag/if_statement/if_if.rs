@@ -1,15 +1,4 @@
-use crate::anaylze::{
-    lexical::{LexicalType, OutDataLoader},
-    syntax::{
-        literal::{
-            structs::{CmpMod, IfFollows},
-            util::{check_end_tag, check_tag_name},
-            If, Item, ItemMeta, Items, Literal,
-        },
-        LoadErr, LoadStatus, SyntaxLoadNext,
-    },
-    PreviewIter, SignTableHandle,
-};
+use crate::anaylze::{PreviewIter, SignTableHandle, lexical::{LexicalType, OutDataLoader}, syntax::{LoadErr, LoadStatus, SyntaxLoadNext, literal::{If, Item, ItemMeta, Items, Literal, TagInfo, structs::{CmpMod, IfFollows}, util::{check_end_tag, check_tag_match, check_tag_name}}}};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for If
 where
@@ -19,7 +8,7 @@ where
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
     ) -> Result<LoadStatus<Self, LexicalType>, LoadErr> {
-        if let Some(tag) = check_tag_name(&last, "if", false) {
+        if let Some(tag) = check_tag_match::<Self>(&last) {
             let model = {
                 let ty_attr = tag.get("mod").ok_or(LoadErr::attr_not_found(
                     "mod",
@@ -55,5 +44,10 @@ where
         } else {
             Ok(LoadStatus::unmatch(last))
         }
+    }
+}
+impl TagInfo for If {
+    fn tag_name() -> &'static str {
+        "if"
     }
 }
