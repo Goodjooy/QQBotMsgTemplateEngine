@@ -1,12 +1,7 @@
-use crate::anaylze::{
-    lexical::{
+use crate::anaylze::{SignTableHandle, lexical::{
         tag::{TagAttr, TagStruct},
         OutDataLoader,
-    },
-    syntax::{literal::structs::ValueOperate, LoadErr},
-    SignTableHandle,
-};
-use super::util::load_express;
+    }, syntax::{LoadErr, literal::{structs::ValueOperate, util::load_express}}};
 
 mod var;
 

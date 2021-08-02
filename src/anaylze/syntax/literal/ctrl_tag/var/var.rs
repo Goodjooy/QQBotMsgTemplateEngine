@@ -1,8 +1,8 @@
 use crate::anaylze::lexical::LexicalType;
+use crate::anaylze::lexical::OutDataLoader;
 use crate::anaylze::syntax::literal::structs::ValueOperate;
 use crate::anaylze::syntax::literal::structs::Var;
 use crate::anaylze::syntax::literal::util::check_tag_name;
-use crate::anaylze::syntax::literal::var::OutDataLoader;
 use crate::anaylze::syntax::LoadErr;
 use crate::anaylze::syntax::LoadStatus;
 use crate::anaylze::syntax::SyntaxLoadNext;

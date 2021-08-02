@@ -6,10 +6,9 @@ use self::structs::{At, For, If, Image, Loop, Sign, While};
 mod cmp;
 mod structs;
 
-mod if_statement;
 mod info_tag;
-mod loops;
-mod var;
+mod ctrl_tag;
+mod literal_tag;
 
 mod util;
 
