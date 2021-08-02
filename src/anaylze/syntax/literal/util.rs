@@ -10,6 +10,11 @@ use crate::anaylze::{
     SignTableHandle,
 };
 
+use super::TagInfo;
+
+pub fn check_tag_match<'a, T: TagInfo>(lt: & 'a LexicalType) -> Option<&'a TagStruct> {
+    check_tag_name(lt, T::tag_name(), T::accept_full())
+}
 pub fn check_tag_name<'a>(
     ty: &'a LexicalType,
     accept_name: &str,

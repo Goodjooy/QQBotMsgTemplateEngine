@@ -1,15 +1,4 @@
-use crate::anaylze::{
-    lexical::{LexicalType, OutDataLoader},
-    syntax::{
-        literal::{
-            structs::For,
-            util::{check_end_tag, check_tag_name, load_attr},
-            Item, ItemMeta, Items, Literal,
-        },
-        LoadErr, LoadStatus, SyntaxLoadNext,
-    },
-    SignTableHandle, Value,
-};
+use crate::anaylze::{SignTableHandle, Value, lexical::{LexicalType, OutDataLoader}, syntax::{LoadErr, LoadStatus, SyntaxLoadNext, literal::{Item, ItemMeta, Items, Literal, TagInfo, structs::For, util::{check_end_tag, check_tag_match, check_tag_name, load_attr}}}};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for For
 where
@@ -19,7 +8,7 @@ where
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
     ) -> Result<LoadStatus<Self, LexicalType>, LoadErr> {
-        if let Some(tag) = check_tag_name(&last, "for", false) {
+        if let Some(tag) = check_tag_match::<Self>(&last) {
             let pos = expr.get_postion();
 
             let source = {
@@ -55,5 +44,10 @@ where
         } else {
             Ok(LoadStatus::unmatch(last))
         }
+    }
+}
+impl TagInfo for For {
+    fn tag_name() -> &'static str {
+        "for"
     }
 }

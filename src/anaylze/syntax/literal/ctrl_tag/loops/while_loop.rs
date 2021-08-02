@@ -3,8 +3,8 @@ use crate::anaylze::{
     syntax::{
         literal::{
             structs::{CmpMod, While},
-            util::{check_end_tag, check_tag_name},
-            Item, ItemMeta, Items, Literal,
+            util::{check_end_tag, check_tag_match},
+            Item, ItemMeta, Items, Literal, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -19,7 +19,7 @@ where
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
     ) -> Result<crate::anaylze::syntax::LoadStatus<Self, LexicalType>, LoadErr> {
-        if let Some(tag) = check_tag_name(&last, "while", false) {
+        if let Some(tag) = check_tag_match::<Self>(&last) {
             let cmp = {
                 let cmp_mod = tag.get("mod").ok_or(LoadErr::attr_not_found(
                     "mod",
@@ -43,5 +43,10 @@ where
         } else {
             Ok(LoadStatus::unmatch(last))
         }
+    }
+}
+impl TagInfo for While {
+    fn tag_name() -> &'static str {
+        "while"
     }
 }

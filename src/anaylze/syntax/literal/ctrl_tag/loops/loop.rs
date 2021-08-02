@@ -1,14 +1,4 @@
-use crate::anaylze::{
-    lexical::{LexicalType, OutDataLoader},
-    syntax::{
-        literal::{
-            util::{check_end_tag, check_tag_name, load_express},
-            Item, ItemMeta, Items, Literal, Loop,
-        },
-        LoadErr, LoadStatus, SyntaxLoadNext,
-    },
-    Sign, SignTableHandle, Value, Var,
-};
+use crate::anaylze::{Sign, SignTableHandle, Value, Var, lexical::{LexicalType, OutDataLoader}, syntax::{LoadErr, LoadStatus, SyntaxLoadNext, literal::{Item, ItemMeta, Items, Literal, Loop, TagInfo, util::{check_end_tag, check_tag_match, check_tag_name, load_express}}}};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Loop
 where
@@ -18,7 +8,7 @@ where
         last: LexicalType,
         expr: &mut OutDataLoader<'a, S>,
     ) -> Result<LoadStatus<Self, LexicalType>, LoadErr> {
-        if let Some(tag) = check_tag_name(&last, "loop", false) {
+        if let Some(tag) = check_tag_match::<Self>(&last) {
             let times_expr = load_express(tag, "times", expr.get_postion(), expr.get_sign_table())?;
 
             let loop_time_name = tag.get("name").and_then(|f| Some(f.get_raw_owner()));
@@ -49,5 +39,11 @@ where
         } else {
             Ok(LoadStatus::unmatch(last))
         }
+    }
+}
+
+impl TagInfo for Loop {
+    fn tag_name()->& 'static str {
+        "loop"
     }
 }

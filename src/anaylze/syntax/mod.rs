@@ -54,14 +54,14 @@ impl<T, N> LoadStatus<T, N> {
             LoadStatus::NotMatch(expr) => Err(f(expr)),
         }
     }
-    pub fn unmatch_then<F, R>(self, f: F) -> Option<LoadStatus<R, N>>
+    pub fn unmatch_then<F>(self, f: F) ->Result< LoadStatus<T, N>,LoadErr>
     where
-        F: FnOnce(N) -> LoadStatus<R,N>,
+        F: FnOnce(N) -> Result<LoadStatus<T,N>,LoadErr>,
     {
         if let Self::NotMatch(n) = self {
-            Some(f(n))
+            f(n)
         } else {
-           None
+          self.into_ok()
         }
     }
     pub fn and_then<R, F>(self, f: F) -> LoadStatus<R, N>

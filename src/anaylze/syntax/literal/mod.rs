@@ -12,6 +12,12 @@ mod literal_tag;
 
 mod util;
 
+pub trait TagInfo {
+    fn tag_name()->& 'static str;
+    fn accept_full()->bool{false}
+}
+
+
 pub struct Items(ItemMeta, Item);
 
 /// * 语法分析单元
