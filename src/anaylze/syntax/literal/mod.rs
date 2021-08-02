@@ -1,4 +1,4 @@
-use crate::anaylze::{lexical::expr::ExprIter};
+use crate::anaylze::lexical::expr::ExprIter;
 
 use self::structs::{At, For, If, Image, Loop, Sign, Var, While};
 
@@ -6,17 +6,19 @@ use self::structs::{At, For, If, Image, Loop, Sign, Var, While};
 mod cmp;
 mod structs;
 
-mod info_tag;
+mod tag;
 mod ctrl_tag;
+mod info_tag;
 mod literal_tag;
 
 mod util;
 
 pub trait TagInfo {
-    fn tag_name()->& 'static str;
-    fn accept_full()->bool{false}
+    fn tag_name() -> &'static str;
+    fn accept_full() -> bool {
+        false
+    }
 }
-
 
 pub struct Items(ItemMeta, Item);
 
