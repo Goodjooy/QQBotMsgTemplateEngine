@@ -3,8 +3,8 @@ use crate::anaylze::{
     syntax::{
         literal::{
             structs::{CmpMod, While},
-            util::{check_end_tag, check_tag_match},
-            Item, ItemMeta, Items, TagInfo,
+            util::{check_tag_match, load_body},
+            TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -30,16 +30,14 @@ where
                 CmpMod::new(ty, tag, expr.get_postion(), expr.get_sign_table())?
             };
 
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
+            expr.into_child();
 
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "while", expr.get_postion())?;
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, Self::tag_name())?;
 
-            Ok(LoadStatus::ok(While {
-                model: cmp,
-                body: Box::new(body),
-            }))
+            expr.leave_child();
+
+            Ok(LoadStatus::ok(While { model: cmp, body }))
         } else {
             Ok(LoadStatus::unmatch(last))
         }

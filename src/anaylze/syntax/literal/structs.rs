@@ -21,34 +21,34 @@ pub struct Sign {
 
 pub struct If {
     pub model: CmpMod,
-    pub body: Box<Items>,
+    pub body: Option<Box<Items>>,
     pub follows: IfFollows,
 }
 
 pub enum IfFollows {
     Nil,
     Elif(Box<If>),
-    Else(Box<Items>),
+    Else(Option<Box<Items>>),
 }
 
 pub struct Loop {
     pub times: Expression,
     pub name: Option<String>,
 
-    pub body: Box<Items>,
+    pub body: Option<Box<Items>>,
 }
 
 pub struct For {
     pub source: Value,
     pub name: String,
 
-    pub body: Box<Items>,
+    pub body: Option<Box<Items>>,
 }
 
 pub struct While {
     pub model: CmpMod,
 
-    pub body: Box<Items>,
+    pub body: Option<Box<Items>>,
 }
 
 pub enum CmpMod {

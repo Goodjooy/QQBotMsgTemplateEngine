@@ -3,8 +3,8 @@ use crate::anaylze::{
     syntax::{
         literal::{
             structs::{CmpMod, IfFollows},
-            util::{check_end_tag, check_tag_match},
-            If, Item, ItemMeta, Items, TagInfo,
+            util::{check_tag_match, load_body},
+            If, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -31,11 +31,12 @@ where
                 CmpMod::new(ty, tag, expr.get_postion(), expr.get_sign_table())?
             };
 
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
-            //close tag
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "if", expr.get_postion())?;
+            expr.into_child();
+
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, Self::tag_name())?;
+
+            expr.leave_child();
 
             let follows = {
                 let da = expr.preview();
@@ -48,7 +49,7 @@ where
 
             Ok(LoadStatus::ok(Self {
                 model,
-                body: Box::new(body),
+                body,
                 follows,
             }))
         } else {

@@ -2,8 +2,7 @@ use crate::anaylze::{
     lexical::{LexicalType, OutDataLoader},
     syntax::{
         literal::{
-            util::{check_end_tag, check_tag_match, load_express},
-            Item, ItemMeta, Items, Loop, TagInfo,
+            util::{check_tag_match, load_body, load_express}, Loop, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -29,21 +28,23 @@ where
                     name,
                     Sign::Var(Var {
                         name: name.to_string(),
-                        value: Value::Int(1),
+                        value: Value::UnSet(name.to_string()),
                     }),
                 );
-            }
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
+            } //TODO: 每次碰到循环语句就进入符号表子表，会出现未预期的行为
 
-            //load end tag
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "loop", expr.get_postion())?;
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, Self::tag_name())?;
+
+            // leave sign table
+            expr.leave_child();
+
+            
 
             let res = Loop {
                 times: times_expr,
                 name: loop_time_name,
-                body: Box::new(body),
+                body,
             };
             Ok(LoadStatus::ok(res))
         } else {

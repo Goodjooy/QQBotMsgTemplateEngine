@@ -3,8 +3,7 @@ use crate::anaylze::{
     syntax::{
         literal::{
             structs::{CmpMod, If, IfFollows},
-            util::{check_end_tag, check_tag_name},
-            Item, ItemMeta, Items,
+            util::{check_tag_name, load_body},
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -31,13 +30,12 @@ where
 
                 CmpMod::new(ty, tag, expr.get_postion(), expr.get_sign_table())?
             };
+            expr.into_child();
 
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, "elif")?;
 
-            //close tag
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "elif", expr.get_postion())?;
+            expr.leave_child();
 
             let follows = {
                 let da = expr.preview();
@@ -49,20 +47,21 @@ where
             .ok_or_else(|f| LoadErr::unexpect("If Flow Tag", f, expr.get_postion()))?;
 
             Ok(LoadStatus::ok(Self::Elif(Box::new(If {
-                model: model,
-                body: Box::new(body),
-                follows: follows,
+                model,
+                body,
+                follows,
             }))))
         } else if let Some(_) = check_tag_name(&last, "else", false) {
             let _last = expr.next().ok_or(LoadErr::IterEnd)?;
 
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
-            //close tag
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "else", expr.get_postion())?;
+            expr.into_child();
 
-            Ok(LoadStatus::ok(Self::Else(Box::new(body))))
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, "else")?;
+
+            expr.leave_child();
+
+            Ok(LoadStatus::ok(Self::Else(body)))
         } else {
             Ok(LoadStatus::ok(Self::Nil))
         }

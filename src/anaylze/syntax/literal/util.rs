@@ -1,18 +1,20 @@
+
+
 use crate::anaylze::{
     lexical::{
         tag::{
             Tag::{CloseTag, FullTag, StartTag},
             TagAttr, TagStruct,
         },
-        LexicalType,
+        LexicalType, OutDataLoader,
     },
     syntax::{expr::Expression, literal::ExprIter, LoadErr, SyntaxLoadNext},
     SignTableHandle,
 };
 
-use super::TagInfo;
+use super::{Items, TagInfo};
 
-pub fn check_tag_match<'a, T: TagInfo>(lt: & 'a LexicalType) -> Option<&'a TagStruct> {
+pub fn check_tag_match<'a, T: TagInfo>(lt: &'a LexicalType) -> Option<&'a TagStruct> {
     check_tag_name(lt, T::tag_name(), T::accept_full())
 }
 pub fn check_tag_name<'a>(
@@ -85,4 +87,27 @@ pub fn check_end_tag(
         }
         _ => Err(LoadErr::unexpect("Tag", ty, pos)),
     }
+}
+
+pub fn load_body<'a, S: SignTableHandle>(
+    last: LexicalType,
+    expr: &mut OutDataLoader<'a, S>,
+    tag_name:&str
+) -> Result<Option<Box<Items>>, LoadErr> {
+    //body
+    let body = {
+        if check_end_tag(&last, tag_name, expr.get_postion()).is_err() {
+            let res = Items::load_next(last, expr)?
+                .ok_or_else(|f| LoadErr::unexpect("Item OR Empty", f, expr.get_postion()))?;
+            // check end
+            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
+            check_end_tag(&end_tag, tag_name, expr.get_postion())?;
+            Some(res)
+        } else {
+            // close checked
+            None
+        }
+    }
+    .and_then(|body| Some(Box::new(body)));
+    Ok(body)
 }

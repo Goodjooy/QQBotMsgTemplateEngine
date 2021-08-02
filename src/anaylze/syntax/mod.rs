@@ -1,6 +1,6 @@
-use std::{error::Error, fmt::{Debug, Display}};
+use std::{fmt::{Debug, Display}};
 
-use crate::anaylze::lexical::expr::ExprLexical;
+
 
 use super::{PreviewIter, Var};
 

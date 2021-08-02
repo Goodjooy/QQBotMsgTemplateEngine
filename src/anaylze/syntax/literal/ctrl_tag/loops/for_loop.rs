@@ -1,15 +1,10 @@
-use crate::anaylze::{
-    lexical::{LexicalType, OutDataLoader},
-    syntax::{
+use crate::anaylze::{Sign, SignTableHandle, Value, Var, lexical::{LexicalType, OutDataLoader}, syntax::{
         literal::{
             structs::For,
-            util::{check_end_tag, check_tag_match, load_attr},
-            Item, ItemMeta, Items, TagInfo,
+            util::{check_tag_match, load_attr, load_body}, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
-    },
-    SignTableHandle, Value,
-};
+    }};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for For
 where
@@ -41,17 +36,24 @@ where
 
             let name = load_attr(tag, "name", pos)?.get_raw_owner();
 
-            //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
+            expr.into_child();
+            {
+                let table = expr.get_sign_table();
+                table.new_sign(
+                    &name,
+                    Sign::Var(Var {
+                        name: name.clone(),
+                        value: Value::UnSet(name.clone()),
+                    }),
+                );
+            }
 
-            let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
-            check_end_tag(&end_tag, "for", expr.get_postion())?;
+            let last = expr.next().ok_or(LoadErr::IterEnd)?;
+            let body = load_body(last, expr, Self::tag_name())?;
 
-            Ok(LoadStatus::ok(Self {
-                source,
-                name,
-                body: Box::new(body),
-            }))
+            expr.leave_child();
+
+            Ok(LoadStatus::ok(Self { source, name, body }))
         } else {
             Ok(LoadStatus::unmatch(last))
         }
