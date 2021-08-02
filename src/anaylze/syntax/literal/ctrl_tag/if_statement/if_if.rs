@@ -4,7 +4,7 @@ use crate::anaylze::{
         literal::{
             structs::{CmpMod, IfFollows},
             util::{check_end_tag, check_tag_match},
-            If, Item, ItemMeta, Items, Literal, TagInfo,
+            If, Item, ItemMeta, Items, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -32,8 +32,7 @@ where
             };
 
             //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Literal(Literal("test".to_string())), Item::Nil);
-
+            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
             //close tag
             let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
             check_end_tag(&end_tag, "if", expr.get_postion())?;

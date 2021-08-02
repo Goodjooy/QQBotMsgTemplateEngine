@@ -4,7 +4,7 @@ use crate::anaylze::{
         literal::{
             structs::For,
             util::{check_end_tag, check_tag_match, load_attr},
-            Item, ItemMeta, Items, Literal, TagInfo,
+            Item, ItemMeta, Items, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -42,7 +42,7 @@ where
             let name = load_attr(tag, "name", pos)?.get_raw_owner();
 
             //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Literal(Literal("test".to_string())), Item::Nil);
+            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
 
             let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;
             check_end_tag(&end_tag, "for", expr.get_postion())?;

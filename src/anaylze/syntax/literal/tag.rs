@@ -1,10 +1,10 @@
 use crate::anaylze::{
     lexical::{LexicalType, OutDataLoader},
-    syntax::{literal::If, LoadErr, LoadStatus, SyntaxLoadNext},
+    syntax::{LoadErr, LoadStatus, SyntaxLoadNext},
     SignTableHandle,
 };
 
-use super::{structs::Var, CtrlTag, InfoTag, LiteralTag, Loops, Tag};
+use super::{CtrlTag, InfoTag, LiteralTag, Tag};
 
 impl<'a, S> SyntaxLoadNext<'a, OutDataLoader<'a, S>, LexicalType> for Tag
 where

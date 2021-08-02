@@ -3,7 +3,7 @@ use crate::anaylze::{
     syntax::{
         literal::{
             util::{check_end_tag, check_tag_match, load_express},
-            Item, ItemMeta, Items, Literal, Loop, TagInfo,
+            Item, ItemMeta, Items, Loop, TagInfo,
         },
         LoadErr, LoadStatus, SyntaxLoadNext,
     },
@@ -34,7 +34,7 @@ where
                 );
             }
             //TODO: ItemsLoader
-            let body: Items = Items(ItemMeta::Literal(Literal("test".to_string())), Item::Nil);
+            let body: Items = Items(ItemMeta::Lit("test".to_string()), Item::Nil);
 
             //load end tag
             let end_tag = expr.next().ok_or(LoadErr::IterEnd)?;

@@ -6,6 +6,8 @@ use self::structs::{At, For, If, Image, Loop, Sign, Var, While};
 mod cmp;
 mod structs;
 
+mod lextical;
+
 mod tag;
 mod ctrl_tag;
 mod info_tag;
@@ -30,11 +32,10 @@ pub enum Item {
 }
 
 pub enum ItemMeta {
-    Literal(Literal),
+    // 字面量分析单元，对应任何不在标签内部的文本
+    Lit(String),
     Tag(Tag),
 }
-// 字面量分析单元，对应任何不在标签内部的文本
-pub struct Literal(String);
 
 // tag分析单元，分析全部tag类型
 pub enum Tag {
